@@ -9,6 +9,10 @@ import java.util.Map;
 
 public class HttpServer {
     public static void main(String[] args) throws IOException {
+        new HttpServer().run();
+    }
+
+    private void run() throws IOException {
         ServerSocket serverSocket = new ServerSocket(8080);
         while (true) {
             Socket clientSocket = serverSocket.accept();
@@ -16,7 +20,7 @@ public class HttpServer {
         }
     }
 
-    private static void handleClient(Socket clientSocket) throws IOException {
+    private void handleClient(Socket clientSocket) throws IOException {
         String requestLine = readLine(clientSocket);
         String[] parts = requestLine.split(" ", 3);
         String requestTarget = parts[1];
@@ -50,7 +54,7 @@ public class HttpServer {
         }
     }
 
-    private static Map<String, String> parseQuery(String queryString) {
+    private Map<String, String> parseQuery(String queryString) {
         Map<String, String> queryParameters = new HashMap<>();
         for (String queryParameter : queryString.split("&")) {
             int equalsPos = queryParameter.indexOf('=');
@@ -62,7 +66,7 @@ public class HttpServer {
         return queryParameters;
     }
 
-    private static String readLine(Socket clientSocket) throws IOException {
+    private String readLine(Socket clientSocket) throws IOException {
         StringBuilder requestLine = new StringBuilder();
         int c;
         while ((c = clientSocket.getInputStream().read()) != '\r') {
@@ -73,7 +77,7 @@ public class HttpServer {
         return requestLine.toString();
     }
 
-    private static void handleNotFound(Socket clientSocket, String requestTarget) throws IOException {
+    private void handleNotFound(Socket clientSocket, String requestTarget) throws IOException {
         String body = requestTarget + " not found";
         clientSocket.getOutputStream().write((
                 "HTTP/1.1 404 Not Found\r\n" +
@@ -85,7 +89,7 @@ public class HttpServer {
         ).getBytes());
     }
 
-    private static void handleStaticFile(Socket clientSocket, File requestedFile) throws IOException {
+    private void handleStaticFile(Socket clientSocket, File requestedFile) throws IOException {
         clientSocket.getOutputStream().write((
                 "HTTP/1.1 200 OK\r\n" +
                 "Connection: close\r\n" +
@@ -98,7 +102,7 @@ public class HttpServer {
         }
     }
 
-    private static void handleHelloAction(Socket clientSocket) throws IOException {
+    private void handleHelloAction(Socket clientSocket) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String headerLine;
         while (!(headerLine = readLine(clientSocket)).isBlank()) {
