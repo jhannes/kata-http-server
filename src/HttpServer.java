@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpServer {
     public static void main(String[] args) throws IOException {
@@ -20,15 +22,30 @@ public class HttpServer {
         while ((c = clientSocket.getInputStream().read()) != '\r') {
             requestLine.append((char) c);
         }
-        System.out.println(requestLine);
         String[] parts = requestLine.toString().split(" ", 3);
         String requestTarget = parts[1];
+
+        String requestAction = requestTarget;
+        Map<String, String> queryParameters = new HashMap<>();
+        int questionPos = requestTarget.indexOf('?');
+        if (questionPos != -1) {
+            requestAction = requestTarget.substring(0, questionPos);
+            String[] query = requestTarget.substring(questionPos+1).split("&");
+            for (String queryParameter : query) {
+                int equalsPos = queryParameter.indexOf('=');
+                queryParameters.put(
+                        queryParameter.substring(0, equalsPos),
+                        queryParameter.substring(equalsPos+1)
+                );
+            }
+        }
+        System.out.println(requestLine + ": requestAction=" + requestAction + " query=" + queryParameters);
 
         // NB: request target always starts with "/".
         // I want to serve the file from the current working
         // directory, not the filesystem root, so I have
         // to discard the first character
-        File requestedFile = new File(requestTarget.substring(1));
+        File requestedFile = new File(requestAction.substring(1));
 
         if (requestedFile.exists()) {
             clientSocket.getOutputStream().write((
