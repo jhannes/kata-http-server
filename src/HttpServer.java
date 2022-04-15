@@ -48,39 +48,51 @@ public class HttpServer {
         File requestedFile = new File(requestAction.substring(1));
 
         if (requestAction.equals("/hello")) {
-            String body = "Hello " + queryParameters.get("userName");
-            clientSocket.getOutputStream().write((
-                    "HTTP/1.1 200 OK\r\n" +
-                    "Connection: close\r\n" +
-                    "Content-length: " + body.length() + "\r\n" +
-                    "\r\n" +
-                    body
-            ).getBytes());
+            handleHelloAction(clientSocket, queryParameters);
         } else if (requestedFile.exists()) {
-            clientSocket.getOutputStream().write((
-                    "HTTP/1.1 200 OK\r\n" +
-                    "Connection: close\r\n" +
-                    "Content-type: text/html; charset=utf-8\r\n" +
-                    "Content-length: " + requestedFile.length() + "\r\n" +
-                    "\r\n"
-            ).getBytes());
-            try (InputStream input = new FileInputStream(requestedFile)) {
-                input.transferTo(clientSocket.getOutputStream());
-            }
+            handleStaticFile(clientSocket, requestedFile);
         } else {
-            String body = requestTarget + " not found";
-            clientSocket.getOutputStream().write((
-                    "HTTP/1.1 404 Not Found\r\n" +
-                    "Connection: close\r\n" +
-                    "Content-type: text/html\r\n" +
-                    "Content-length: " + body.length() + "\r\n" +
-                    "\r\n" +
-                    body
-            ).getBytes());
+            handleNotFound(clientSocket, requestTarget);
         }
 
         while ((c = clientSocket.getInputStream().read()) != -1) {
             System.out.print((char)c);
         }
+    }
+
+    private static void handleNotFound(Socket clientSocket, String requestTarget) throws IOException {
+        String body = requestTarget + " not found";
+        clientSocket.getOutputStream().write((
+                "HTTP/1.1 404 Not Found\r\n" +
+                "Connection: close\r\n" +
+                "Content-type: text/html\r\n" +
+                "Content-length: " + body.length() + "\r\n" +
+                "\r\n" +
+                body
+        ).getBytes());
+    }
+
+    private static void handleStaticFile(Socket clientSocket, File requestedFile) throws IOException {
+        clientSocket.getOutputStream().write((
+                "HTTP/1.1 200 OK\r\n" +
+                "Connection: close\r\n" +
+                "Content-type: text/html; charset=utf-8\r\n" +
+                "Content-length: " + requestedFile.length() + "\r\n" +
+                "\r\n"
+        ).getBytes());
+        try (InputStream input = new FileInputStream(requestedFile)) {
+            input.transferTo(clientSocket.getOutputStream());
+        }
+    }
+
+    private static void handleHelloAction(Socket clientSocket, Map<String, String> queryParameters) throws IOException {
+        String body = "Hello " + queryParameters.get("userName");
+        clientSocket.getOutputStream().write((
+                "HTTP/1.1 200 OK\r\n" +
+                "Connection: close\r\n" +
+                "Content-length: " + body.length() + "\r\n" +
+                "\r\n" +
+                body
+        ).getBytes());
     }
 }
