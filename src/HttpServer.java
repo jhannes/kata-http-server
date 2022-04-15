@@ -92,6 +92,17 @@ public class HttpServer {
     }
 
     private static void handleHelloAction(Socket clientSocket, Map<String, String> queryParameters) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String headerLine;
+        while (!(headerLine = readLine(clientSocket)).isBlank()) {
+            int colonPos = headerLine.indexOf(':');
+            headers.put(
+                    headerLine.substring(0, colonPos),
+                    headerLine.substring(colonPos+1)
+            );
+        }
+        System.out.println(headers);
+
         String body = "Hello " + queryParameters.get("userName");
         clientSocket.getOutputStream().write((
                 "HTTP/1.1 200 OK\r\n" +
