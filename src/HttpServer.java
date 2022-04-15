@@ -104,6 +104,13 @@ public class HttpServer {
             );
         }
         System.out.println(headers);
+        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < contentLength; i++) {
+            builder.append((char)clientSocket.getInputStream().read());
+        }
+        String requestBody = builder.toString();
+        System.out.println("requestBody=" + requestBody);
 
         String body = "Hello " + queryParameters.get("userName");
         clientSocket.getOutputStream().write((
