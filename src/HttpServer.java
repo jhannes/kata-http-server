@@ -47,7 +47,16 @@ public class HttpServer {
         // to discard the first character
         File requestedFile = new File(requestAction.substring(1));
 
-        if (requestedFile.exists()) {
+        if (requestAction.equals("/hello")) {
+            String body = "Hello " + queryParameters.get("userName");
+            clientSocket.getOutputStream().write((
+                    "HTTP/1.1 200 OK\r\n" +
+                    "Connection: close\r\n" +
+                    "Content-length: " + body.length() + "\r\n" +
+                    "\r\n" +
+                    body
+            ).getBytes());
+        } else if (requestedFile.exists()) {
             clientSocket.getOutputStream().write((
                     "HTTP/1.1 200 OK\r\n" +
                     "Connection: close\r\n" +
