@@ -26,14 +26,7 @@ public class HttpServer {
         int questionPos = requestTarget.indexOf('?');
         if (questionPos != -1) {
             requestAction = requestTarget.substring(0, questionPos);
-            String[] query = requestTarget.substring(questionPos+1).split("&");
-            for (String queryParameter : query) {
-                int equalsPos = queryParameter.indexOf('=');
-                queryParameters.put(
-                        queryParameter.substring(0, equalsPos),
-                        queryParameter.substring(equalsPos+1)
-                );
-            }
+            queryParameters = parseQuery(requestTarget.substring(questionPos + 1));
         }
         System.out.println(requestLine + ": requestAction=" + requestAction + " query=" + queryParameters);
 
@@ -55,6 +48,18 @@ public class HttpServer {
         while ((c = clientSocket.getInputStream().read()) != -1) {
             System.out.print((char)c);
         }
+    }
+
+    private static Map<String, String> parseQuery(String queryString) {
+        Map<String, String> queryParameters = new HashMap<>();
+        for (String queryParameter : queryString.split("&")) {
+            int equalsPos = queryParameter.indexOf('=');
+            queryParameters.put(
+                    queryParameter.substring(0, equalsPos),
+                    queryParameter.substring(equalsPos+1)
+            );
+        }
+        return queryParameters;
     }
 
     private static String readLine(Socket clientSocket) throws IOException {
