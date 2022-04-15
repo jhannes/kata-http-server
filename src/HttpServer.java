@@ -21,71 +21,52 @@ public class HttpServer {
     }
 
     private void handleClient(Socket clientSocket) throws IOException {
-        // Read the start line of the request
-        // E.g. on the format GET /index.html HTTP/1.1
         String requestLine = readLine(clientSocket);
         String[] parts = requestLine.split(" ", 3);
         String requestTarget = parts[1];
 
-        // Separate out queryParameters from requestTarget
-        // E.g. GET /hello?username=Johannes HTTP/1.1
-        // requestTarget becomes /hello?username=Johannes
-        // requestAction becomes /hello
-        // and queryParameters becomes {"username": "Johannes"}
         String requestAction = requestTarget;
         Map<String, String> queryParameters = new HashMap<>();
         int questionPos = requestTarget.indexOf('?');
         if (questionPos != -1) {
-            // Parse query parameters
             requestAction = requestTarget.substring(0, questionPos);
-            for (String queryParameter : requestTarget.substring(questionPos + 1).split("&")) {
-                int equalsPos = queryParameter.indexOf('=');
-                String key = queryParameter.substring(equalsPos + 1);
-                String value = queryParameter.substring(0, equalsPos);
-                queryParameters.put(key, value);
-            }
+            queryParameters = parseQuery(
+                    requestTarget.substring(questionPos + 1)
+            );
         }
+        System.out.println(requestLine);
 
-        // Route the request based on the requestAction
+        // NB: request target always starts with "/".
+        // I want to serve the file from the current working
+        // directory, not the filesystem root, so I have
+        // to discard the first character
+        File requestedFile = new File(requestAction.substring(1));
+
         if (requestAction.equals("/hello")) {
-            // handle hello action
-            String body = "Hello " + queryParameters.get("userName");
-            clientSocket.getOutputStream().write((
-                    "HTTP/1.1 200 OK\r\n" +
-                    "Connection: close\r\n" +
-                    "Content-length: " + body.length() + "\r\n" +
-                    "\r\n" +
-                    body
-            ).getBytes());
+            handleHelloAction(clientSocket);
+        } else if (requestedFile.exists()) {
+            handleStaticFile(clientSocket, requestedFile);
+        } else {
+            handleNotFound(clientSocket, requestTarget);
         }
 
-            // NB: request target always starts with "/".
-            // I want to serve the file from the current working
-            // directory, not the filesystem root, so I have
-            // to discard the first character
-            File requestedFile = new File(requestAction.substring(1));
-            if (requestedFile.exists()) {
-                handleStaticFile(clientSocket, requestedFile);
-            } else {
-                handleNotFound(clientSocket, requestTarget);
-            }
-
-            int c;
-            while ((c = clientSocket.getInputStream().read()) != -1) {
-                System.out.print((char)c);
-            }
+        int c;
+        while ((c = clientSocket.getInputStream().read()) != -1) {
+            System.out.print((char)c);
         }
-
-private Map<String, String> parseQuery(String queryString) {
-    Map<String, String> queryParameters = new HashMap<>();
-    for (String queryParameter : queryString.split("&")) {
-        int equalsPos = queryParameter.indexOf('=');
-        String key = queryParameter.substring(equalsPos + 1);
-        String value = queryParameter.substring(0, equalsPos);
-        queryParameters.put(key, value);
     }
-    return queryParameters;
-}
+
+    private Map<String, String> parseQuery(String queryString) {
+        Map<String, String> queryParameters = new HashMap<>();
+        for (String queryParameter : queryString.split("&")) {
+            int equalsPos = queryParameter.indexOf('=');
+            queryParameters.put(
+                    queryParameter.substring(0, equalsPos),
+                    queryParameter.substring(equalsPos+1)
+            );
+        }
+        return queryParameters;
+    }
 
     private String readLine(Socket clientSocket) throws IOException {
         StringBuilder requestLine = new StringBuilder();
