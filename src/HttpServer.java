@@ -37,7 +37,7 @@ public class HttpServer {
         File requestedFile = new File(requestAction.substring(1));
 
         if (requestAction.equals("/hello")) {
-            handleHelloAction(clientSocket, queryParameters);
+            handleHelloAction(clientSocket);
         } else if (requestedFile.exists()) {
             handleStaticFile(clientSocket, requestedFile);
         } else {
@@ -98,7 +98,7 @@ public class HttpServer {
         }
     }
 
-    private static void handleHelloAction(Socket clientSocket, Map<String, String> queryParameters) throws IOException {
+    private static void handleHelloAction(Socket clientSocket) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String headerLine;
         while (!(headerLine = readLine(clientSocket)).isBlank()) {
@@ -108,14 +108,12 @@ public class HttpServer {
                     headerLine.substring(colonPos+1).trim()
             );
         }
-        System.out.println(headers);
         int contentLength = Integer.parseInt(headers.get("Content-Length"));
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < contentLength; i++) {
             builder.append((char)clientSocket.getInputStream().read());
         }
-        String requestBody = builder.toString();
-        System.out.println("requestBody=" + requestBody);
+        Map<String, String> queryParameters = parseQuery(builder.toString());
 
         String body = "Hello " + queryParameters.get("userName");
         clientSocket.getOutputStream().write((
