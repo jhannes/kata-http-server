@@ -63,6 +63,8 @@ public class HttpServer {
         while ((c = clientSocket.getInputStream().read()) != '\r') {
             requestLine.append((char) c);
         }
+        // We expect a \n after the \r
+        clientSocket.getInputStream().read();
         return requestLine.toString();
     }
 
@@ -97,8 +99,8 @@ public class HttpServer {
         while (!(headerLine = readLine(clientSocket)).isBlank()) {
             int colonPos = headerLine.indexOf(':');
             headers.put(
-                    headerLine.substring(0, colonPos),
-                    headerLine.substring(colonPos+1)
+                    headerLine.substring(0, colonPos).trim(),
+                    headerLine.substring(colonPos+1).trim()
             );
         }
         System.out.println(headers);
