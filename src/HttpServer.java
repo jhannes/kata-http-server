@@ -7,5 +7,9 @@ public class HttpServer {
         ServerSocket serverSocket = new ServerSocket(8080);
         Socket clientSocket = serverSocket.accept();
         System.out.println("Client connected");
+        int c;
+        while ((c = clientSocket.getInputStream().read()) != -1) {
+            System.out.print((char)c);
+        }
     }
 }
