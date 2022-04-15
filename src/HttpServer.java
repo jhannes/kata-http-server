@@ -8,8 +8,10 @@ import java.net.Socket;
 public class HttpServer {
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(8080);
-        Socket clientSocket = serverSocket.accept();
-        handleClient(clientSocket);
+        while (true) {
+            Socket clientSocket = serverSocket.accept();
+            handleClient(clientSocket);
+        }
     }
 
     private static void handleClient(Socket clientSocket) throws IOException {
@@ -50,7 +52,6 @@ public class HttpServer {
                     body
             ).getBytes());
         }
-
 
         while ((c = clientSocket.getInputStream().read()) != -1) {
             System.out.print((char)c);
