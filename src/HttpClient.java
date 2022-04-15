@@ -1,9 +1,10 @@
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.Socket;
 
 public class HttpClient {
     public static void main(String[] args) throws IOException {
-        Socket socket = new Socket("example.org", 80);
+        Socket socket = SSLSocketFactory.getDefault().createSocket("example.org", 443);
         socket.getOutputStream().write(
                 ("GET / HTTP/1.1\r\n" +
                 "Host: example.org\r\n" +
