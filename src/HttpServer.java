@@ -13,10 +13,12 @@ public class HttpServer {
             requestLine.append((char) c);
         }
         System.out.println(requestLine);
+        String[] parts = requestLine.toString().split(" ", 3);
+        String requestTarget = parts[1];
 
-        String body = "Hello world";
+        String body = requestTarget + " not found";
         clientSocket.getOutputStream().write((
-                "HTTP/1.1 200 OK\r\n" +
+                "HTTP/1.1 404 Not Found\r\n" +
                 "Connection: close\r\n" +
                 "Content-type: text/html\r\n" +
                 "Content-length: " + body.length() + "\r\n" +
