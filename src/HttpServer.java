@@ -17,12 +17,8 @@ public class HttpServer {
     }
 
     private static void handleClient(Socket clientSocket) throws IOException {
-        StringBuilder requestLine = new StringBuilder();
-        int c;
-        while ((c = clientSocket.getInputStream().read()) != '\r') {
-            requestLine.append((char) c);
-        }
-        String[] parts = requestLine.toString().split(" ", 3);
+        String requestLine = readLine(clientSocket);
+        String[] parts = requestLine.split(" ", 3);
         String requestTarget = parts[1];
 
         String requestAction = requestTarget;
@@ -55,9 +51,19 @@ public class HttpServer {
             handleNotFound(clientSocket, requestTarget);
         }
 
+        int c;
         while ((c = clientSocket.getInputStream().read()) != -1) {
             System.out.print((char)c);
         }
+    }
+
+    private static String readLine(Socket clientSocket) throws IOException {
+        StringBuilder requestLine = new StringBuilder();
+        int c;
+        while ((c = clientSocket.getInputStream().read()) != '\r') {
+            requestLine.append((char) c);
+        }
+        return requestLine.toString();
     }
 
     private static void handleNotFound(Socket clientSocket, String requestTarget) throws IOException {
