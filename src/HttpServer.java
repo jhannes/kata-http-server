@@ -30,9 +30,11 @@ public class HttpServer {
         int questionPos = requestTarget.indexOf('?');
         if (questionPos != -1) {
             requestAction = requestTarget.substring(0, questionPos);
-            queryParameters = parseQuery(requestTarget.substring(questionPos + 1));
+            queryParameters = parseQuery(
+                    requestTarget.substring(questionPos + 1)
+            );
         }
-        System.out.println(requestLine + ": requestAction=" + requestAction + " query=" + queryParameters);
+        System.out.println(requestLine);
 
         // NB: request target always starts with "/".
         // I want to serve the file from the current working
@@ -77,7 +79,9 @@ public class HttpServer {
         return requestLine.toString();
     }
 
-    private void handleNotFound(Socket clientSocket, String requestTarget) throws IOException {
+    private void handleNotFound(
+            Socket clientSocket, String requestTarget
+    ) throws IOException {
         String body = requestTarget + " not found";
         clientSocket.getOutputStream().write((
                 "HTTP/1.1 404 Not Found\r\n" +
@@ -89,7 +93,9 @@ public class HttpServer {
         ).getBytes());
     }
 
-    private void handleStaticFile(Socket clientSocket, File requestedFile) throws IOException {
+    private void handleStaticFile(
+            Socket clientSocket, File requestedFile
+    ) throws IOException {
         clientSocket.getOutputStream().write((
                 "HTTP/1.1 200 OK\r\n" +
                 "Connection: close\r\n" +
@@ -102,7 +108,9 @@ public class HttpServer {
         }
     }
 
-    private void handleHelloAction(Socket clientSocket) throws IOException {
+    private void handleHelloAction(
+            Socket clientSocket
+    ) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String headerLine;
         while (!(headerLine = readLine(clientSocket)).isBlank()) {
@@ -112,12 +120,14 @@ public class HttpServer {
                     headerLine.substring(colonPos+1).trim()
             );
         }
-        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        int contentLength =
+                Integer.parseInt(headers.get("Content-Length"));
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < contentLength; i++) {
             builder.append((char)clientSocket.getInputStream().read());
         }
-        Map<String, String> queryParameters = parseQuery(builder.toString());
+        Map<String, String> queryParameters =
+                parseQuery(builder.toString());
 
         String body = "Hello " + queryParameters.get("userName");
         clientSocket.getOutputStream().write((
