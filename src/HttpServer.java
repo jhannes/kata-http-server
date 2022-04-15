@@ -9,7 +9,10 @@ public class HttpServer {
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(8080);
         Socket clientSocket = serverSocket.accept();
+        handleClient(clientSocket);
+    }
 
+    private static void handleClient(Socket clientSocket) throws IOException {
         StringBuilder requestLine = new StringBuilder();
         int c;
         while ((c = clientSocket.getInputStream().read()) != '\r') {
