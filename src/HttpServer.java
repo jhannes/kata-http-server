@@ -6,7 +6,13 @@ public class HttpServer {
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(8080);
         Socket clientSocket = serverSocket.accept();
-        System.out.println("Client connected");
+
+        StringBuilder requestLine = new StringBuilder();
+        int c;
+        while ((c = clientSocket.getInputStream().read()) != '\r') {
+            requestLine.append((char) c);
+        }
+        System.out.println(requestLine);
 
         String body = "Hello world";
         clientSocket.getOutputStream().write((
@@ -16,9 +22,9 @@ public class HttpServer {
                 "Content-length: " + body.length() + "\r\n" +
                 "\r\n" +
                 body
-                ).getBytes());
+        ).getBytes());
 
-        int c;
+
         while ((c = clientSocket.getInputStream().read()) != -1) {
             System.out.print((char)c);
         }
