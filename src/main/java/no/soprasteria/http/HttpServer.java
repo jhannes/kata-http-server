@@ -44,45 +44,36 @@ public class HttpServer {
 
         var resolvedPath = baseDir.resolve(requestTarget.substring(1));
         if (Files.exists(resolvedPath)) {
-            var responseHeader = """
-                HTTP/1.1 200 OK\r
-                Connection: close\r
-                Transfer-Encoding: chunked\r
-                Content-Type: text/html; charset=utf-8\r
-                \r
-                """;
-            clientSocket.getOutputStream().write(responseHeader.getBytes(StandardCharsets.UTF_8));
-
+            writeHeader(clientSocket, 200, "OK", "text/html; charset=utf-8");
             var body = "Unknown file " + requestTarget;
-            var contentLength = body.getBytes(StandardCharsets.UTF_8).length;
-            clientSocket.getOutputStream().write((Integer.toHexString(contentLength) + "\r\n" +
-                                                  body + "\r\n" +
-                                                  0 + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
-            return;
+            writeResponseBody(clientSocket, body);
+        } else {
+            writeHeader(clientSocket, 404, "NOT FOUND", "text/html; charset=utf-8");
+            writeResponseBody(clientSocket, "Unknown file " + requestTarget);
         }
+    }
 
-
-        var responseHeader = """
-                HTTP/1.1 404 NOT FOUND\r
-                Connection: close\r
-                Transfer-Encoding: chunked\r
-                Content-Type: text/html; charset=utf-8\r
-                \r
-                """;
-        clientSocket.getOutputStream().write(responseHeader.getBytes(StandardCharsets.UTF_8));
-
-        var body = "Unknown file " + requestTarget;
+    private static void writeResponseBody(Socket clientSocket, String body) throws IOException {
         var contentLength = body.getBytes(StandardCharsets.UTF_8).length;
         clientSocket.getOutputStream().write((Integer.toHexString(contentLength) + "\r\n" +
                                               body + "\r\n" +
                                               0 + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
     }
 
+    private static void writeHeader(Socket clientSocket, int responseCode, String responseMessage, String contentType) throws IOException {
+        var responseHeader = "HTTP/1.1 " + responseCode + " " + responseMessage + "\r\n" +
+                             "Connection: close\r\n" +
+                             "Transfer-Encoding: chunked\r\n" +
+                             "Content-Type: " + contentType + "\r\n" +
+                             "\r\n";
+        clientSocket.getOutputStream().write(responseHeader.getBytes(StandardCharsets.UTF_8));
+    }
+
     private static String readLine(InputStream inputStream) throws IOException {
         var result = new StringBuilder();
         int c;
         while ((c = inputStream.read()) != '\r') {
-            result.append((char)c);
+            result.append((char) c);
         }
         return result.toString();
     }
