@@ -2,16 +2,30 @@ package no.soprasteria.http;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 @SuppressWarnings("resource")
 public class HttpServer {
 
     public static void main(String[] args) throws IOException {
-        var socket = new ServerSocket(8080);
+        new HttpServer(8080).startServer();
+    }
 
-        var clientSocket = socket.accept();
+    private final ServerSocket socket;
 
+    public HttpServer(int port) throws IOException {
+        socket = new ServerSocket(port);
+    }
+
+    private void startServer() throws IOException {
+        while (!Thread.interrupted()) {
+            var clientSocket = socket.accept();
+            handleRequest(clientSocket);
+        }
+    }
+
+    private static void handleRequest(Socket clientSocket) throws IOException {
         var body = "hallæ værden!";
         var contentLength = body.getBytes(StandardCharsets.UTF_8).length;
         var response = "HTTP/1.1 200 OK\r\n" +
@@ -25,9 +39,12 @@ public class HttpServer {
 
         clientSocket.getOutputStream().write(response.getBytes(StandardCharsets.UTF_8));
 
+        /*
         int c;
         while ((c = clientSocket.getInputStream().read()) != -1) {
             System.out.print((char)c);
         }
+
+         */
     }
 }
