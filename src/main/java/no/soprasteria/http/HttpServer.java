@@ -7,16 +7,17 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 
 public class HttpServer {
 
     public static void main(String[] args) throws IOException {
-        new HttpServer(8080).startServer();
+        new HttpServer(8080, null).startServer();
     }
 
     private final ServerSocket socket;
 
-    public HttpServer(int port) throws IOException {
+    public HttpServer(int port, Path baseDir) throws IOException {
         socket = new ServerSocket(port);
     }
 

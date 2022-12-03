@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,10 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class HttpServerTest {
     private static final Random random = new Random();
     private HttpServer server;
+    private Path baseDir;
 
     @BeforeEach
     void setUp() throws IOException {
-        server = new HttpServer(0);
+        baseDir = Path.of("target", "test-files", "http-" + random.nextInt());
+        Files.createDirectories(baseDir);
+        server = new HttpServer(0, baseDir);
         server.startServer();
     }
 
@@ -29,6 +35,17 @@ class HttpServerTest {
         assertEquals(404, connection.getResponseCode());
         assertEquals("Unknown file " + path, asString(connection.getErrorStream()));
     }
+
+    @Test
+    void shouldServeFile() throws IOException {
+        var newFile = "new-file-" + random.nextInt();
+        var content = LocalDateTime.now().toString();
+        Files.writeString(baseDir.resolve(newFile), content);
+        var connection = getOpenConnection("/" + newFile);
+        assertEquals(200, connection.getResponseCode());
+    }
+
+
 
     private static String asString(InputStream stream) throws IOException {
         var buffer = new ByteArrayOutputStream();
