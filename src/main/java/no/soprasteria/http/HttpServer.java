@@ -1,5 +1,6 @@
 package no.soprasteria.http;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -45,8 +46,11 @@ public class HttpServer {
         var resolvedPath = baseDir.resolve(requestTarget.substring(1));
         if (Files.exists(resolvedPath)) {
             writeHeader(clientSocket, 200, "OK", "text/html; charset=utf-8");
-            var body = "Unknown file " + requestTarget;
-            writeResponseBody(clientSocket, body);
+            clientSocket.getOutputStream().write((Long.toHexString(Files.size(resolvedPath)) + "\r\n").getBytes());
+            try (var inputStream = new FileInputStream(resolvedPath.toFile())) {
+                inputStream.transferTo(clientSocket.getOutputStream());
+            }
+            clientSocket.getOutputStream().write(("\r\n" + 0 + "\r\n\r\n").getBytes());
         } else {
             writeHeader(clientSocket, 404, "NOT FOUND", "text/html; charset=utf-8");
             writeResponseBody(clientSocket, "Unknown file " + requestTarget);
