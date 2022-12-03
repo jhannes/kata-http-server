@@ -14,7 +14,7 @@ import java.nio.file.Path;
 public class HttpServer {
 
     public static void main(String[] args) throws IOException {
-        new HttpServer(8080, null).startServer();
+        new HttpServer(8080, Path.of("src", "main", "resources", "web")).startServer();
     }
 
     private final ServerSocket socket;
