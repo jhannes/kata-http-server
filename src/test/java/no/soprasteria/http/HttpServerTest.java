@@ -43,6 +43,7 @@ class HttpServerTest {
         Files.writeString(baseDir.resolve(newFile), content);
         var connection = getOpenConnection("/" + newFile);
         assertEquals(200, connection.getResponseCode());
+        assertEquals(content, asString(connection.getInputStream()));
     }
 
 
