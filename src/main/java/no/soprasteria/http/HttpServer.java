@@ -52,14 +52,6 @@ public class HttpServer {
         clientSocket.getOutputStream().write((Integer.toHexString(contentLength) + "\r\n" +
                                               body + "\r\n" +
                                               0 + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
-
-        /*
-        int c;
-        while ((c = clientSocket.getInputStream().read()) != -1) {
-            System.out.print((char)c);
-        }
-
-         */
     }
 
     private static String readLine(InputStream inputStream) throws IOException {
