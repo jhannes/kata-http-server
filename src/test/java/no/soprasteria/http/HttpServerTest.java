@@ -65,6 +65,14 @@ class HttpServerTest {
         assertEquals("text/css; charset=utf-8", connection.getHeaderField("Content-Type"));
     }
 
+    @Test
+    void shouldLogIn() throws IOException {
+        var connection = getOpenConnection("/api/login");
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+        connection.getOutputStream().write("username=johannes".getBytes());
+        assertEquals(302, connection.getResponseCode());
+    }
 
     private static String asString(InputStream stream) throws IOException {
         var buffer = new ByteArrayOutputStream();
