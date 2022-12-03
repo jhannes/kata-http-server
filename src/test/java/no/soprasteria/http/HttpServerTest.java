@@ -74,6 +74,7 @@ class HttpServerTest {
         connection.getOutputStream().write("username=johannes".getBytes());
         assertEquals(302, connection.getResponseCode());
         assertEquals(server.getURL().toString(), connection.getHeaderField("Location"));
+        assertEquals("user=johannes", connection.getHeaderField("Set-Cookie"));
     }
 
     private static String asString(InputStream stream) throws IOException {
