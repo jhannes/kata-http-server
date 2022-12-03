@@ -10,6 +10,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpServer {
 
@@ -44,10 +46,14 @@ public class HttpServer {
         var parts = requestLine.split(" ");
         var requestTarget = parts[1];
 
+        var headers = readHeaders(clientSocket.getInputStream());
+
         if (requestTarget.equals("/api/login")) {
+            var host = headers.get("Host");
+            var location = "http://" + host + "/";
             var responseHeader = "HTTP/1.1 " + 302 + " " + "MOVED" + "\r\n" +
                                  "Connection: close\r\n" +
-                                 "Location: http://localhost:8080/\r\n" +
+                                 "Location: " + location + "\r\n" +
                                  "\r\n";
             clientSocket.getOutputStream().write(responseHeader.getBytes());
             return;
@@ -75,6 +81,16 @@ public class HttpServer {
         }
     }
 
+    private Map<String, String> readHeaders(InputStream inputStream) throws IOException {
+        var result = new HashMap<String, String>();
+        String line;
+        while (!(line = readLine(inputStream)).isEmpty()) {
+            var parts = line.split(":\\s+", 2);
+            result.put(parts[0], parts[1]);
+        }
+        return result;
+    }
+
     private static void writeResponseBody(Socket clientSocket, String body) throws IOException {
         var contentLength = body.getBytes().length;
         clientSocket.getOutputStream().write((Integer.toHexString(contentLength) + "\r\n" +
@@ -97,6 +113,7 @@ public class HttpServer {
         while ((c = inputStream.read()) != '\r') {
             result.append((char) c);
         }
+        inputStream.read();
         return result.toString();
     }
 
