@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-@SuppressWarnings("resource")
 public class HttpServer {
 
     public static void main(String[] args) throws IOException {
@@ -20,11 +19,16 @@ public class HttpServer {
         socket = new ServerSocket(port);
     }
 
-    void startServer() throws IOException {
-        while (!Thread.interrupted()) {
-            var clientSocket = socket.accept();
-            handleRequest(clientSocket);
-        }
+    void startServer() {
+        new Thread(() -> {
+            while (!Thread.interrupted()) {
+                try (var clientSocket = socket.accept()) {
+                    handleRequest(clientSocket);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     private static void handleRequest(Socket clientSocket) throws IOException {
