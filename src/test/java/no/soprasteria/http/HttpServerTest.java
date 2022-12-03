@@ -46,6 +46,17 @@ class HttpServerTest {
         assertEquals(content, asString(connection.getInputStream()));
     }
 
+    @Test
+    void shouldServeIndexHtml() throws IOException {
+        var newDir = baseDir.resolve("dir-" + random.nextInt());
+        Files.createDirectories(newDir);
+        var content = LocalDateTime.now().toString();
+        Files.writeString(newDir.resolve("index.html"), content);
+        var connection = getOpenConnection("/" + newDir.getFileName());
+        assertEquals(200, connection.getResponseCode());
+        assertEquals(content, asString(connection.getInputStream()));
+    }
+
 
 
     private static String asString(InputStream stream) throws IOException {
