@@ -3,6 +3,7 @@ package no.soprasteria.http;
 import java.io.IOException;
 import java.net.ServerSocket;
 
+@SuppressWarnings("resource")
 public class HttpServer {
 
     public static void main(String[] args) throws IOException {
@@ -11,7 +12,7 @@ public class HttpServer {
         var clientSocket = socket.accept();
         int c;
         while ((c = clientSocket.getInputStream().read()) != -1) {
-            System.out.println(c);
+            System.out.print((char)c);
         }
     }
 }
