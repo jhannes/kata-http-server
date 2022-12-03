@@ -17,9 +17,11 @@ public class HttpServer {
         var response = "HTTP/1.1 200 OK\r\n" +
                        "Connection: close\r\n" +
                        "Content-Type: text/html; charset=utf-8\r\n" +
-                       "Content-Length: " + contentLength + "\r\n" +
+                       "Transfer-Encoding: chunked\r\n" +
                        "\r\n" +
-                       body;
+                       Integer.toHexString(contentLength) + "\r\n" +
+                       body + "\r\n" +
+                       0 + "\r\n\r\n";
 
         clientSocket.getOutputStream().write(response.getBytes(StandardCharsets.UTF_8));
 
