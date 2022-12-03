@@ -50,6 +50,9 @@ public class HttpServer {
         }
         if (Files.exists(resolvedPath)) {
             var contentType = "text/html; charset=utf-8";
+            if (resolvedPath.getFileName().toString().endsWith(".css")) {
+                contentType = "text/css; charset=utf-8";
+            }
             writeHeader(clientSocket, 200, "OK", contentType);
             clientSocket.getOutputStream().write((Long.toHexString(Files.size(resolvedPath)) + "\r\n").getBytes());
             try (var inputStream = new FileInputStream(resolvedPath.toFile())) {
