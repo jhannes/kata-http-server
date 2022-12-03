@@ -14,6 +14,7 @@ public class HttpServer {
         var body = "hello world";
         var response = "HTTP/1.1 200 OK\r\n" +
                        "Connection: close\r\n" +
+                       "Content-Type: text/html\r\n" +
                        "Content-Length: " + body.length() + "\r\n" +
                        "\r\n" +
                        body;
