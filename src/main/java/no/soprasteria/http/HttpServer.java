@@ -34,7 +34,7 @@ public class HttpServer {
     private static void handleRequest(Socket clientSocket) throws IOException {
         var body = "hallæ værden!";
         var contentLength = body.getBytes(StandardCharsets.UTF_8).length;
-        var response = "HTTP/1.1 200 OK\r\n" +
+        var response = "HTTP/1.1 404 NOT FOUND\r\n" +
                        "Connection: close\r\n" +
                        "Content-Type: text/html; charset=utf-8\r\n" +
                        "Transfer-Encoding: chunked\r\n" +
