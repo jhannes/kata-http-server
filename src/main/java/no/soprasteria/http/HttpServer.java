@@ -44,6 +44,15 @@ public class HttpServer {
         var parts = requestLine.split(" ");
         var requestTarget = parts[1];
 
+        if (requestTarget.equals("/api/login")) {
+            var responseHeader = "HTTP/1.1 " + 302 + " " + "MOVED" + "\r\n" +
+                                 "Connection: close\r\n" +
+                                 "Location: http://localhost:8080/\r\n" +
+                                 "\r\n";
+            clientSocket.getOutputStream().write(responseHeader.getBytes());
+            return;
+        }
+
         var resolvedPath = baseDir.resolve(requestTarget.substring(1));
         if (Files.isDirectory(resolvedPath)) {
             resolvedPath = resolvedPath.resolve("index.html");
@@ -67,7 +76,7 @@ public class HttpServer {
     }
 
     private static void writeResponseBody(Socket clientSocket, String body) throws IOException {
-        var contentLength = body.getBytes(StandardCharsets.UTF_8).length;
+        var contentLength = body.getBytes().length;
         clientSocket.getOutputStream().write((Integer.toHexString(contentLength) + "\r\n" +
                                               body + "\r\n" +
                                               0 + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
