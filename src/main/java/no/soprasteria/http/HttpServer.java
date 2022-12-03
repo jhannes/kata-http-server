@@ -1,6 +1,7 @@
 package no.soprasteria.http;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -32,6 +33,11 @@ public class HttpServer {
     }
 
     private static void handleRequest(Socket clientSocket) throws IOException {
+        var requestLine = readLine(clientSocket.getInputStream());
+        System.out.println(requestLine);
+        var parts = requestLine.split(" ");
+        var requestTarget = parts[1];
+
         var responseHeader = """
                 HTTP/1.1 404 NOT FOUND\r
                 Connection: close\r
@@ -41,7 +47,7 @@ public class HttpServer {
                 """;
         clientSocket.getOutputStream().write(responseHeader.getBytes(StandardCharsets.UTF_8));
 
-        var body = "Unknown file /unknown-url";
+        var body = "Unknown file " + requestTarget;
         var contentLength = body.getBytes(StandardCharsets.UTF_8).length;
         clientSocket.getOutputStream().write((Integer.toHexString(contentLength) + "\r\n" +
                                               body + "\r\n" +
@@ -54,6 +60,15 @@ public class HttpServer {
         }
 
          */
+    }
+
+    private static String readLine(InputStream inputStream) throws IOException {
+        var result = new StringBuilder();
+        int c;
+        while ((c = inputStream.read()) != '\r') {
+            result.append((char)c);
+        }
+        return result.toString();
     }
 
     public URL getURL() throws MalformedURLException {
