@@ -44,6 +44,9 @@ public class HttpServer {
         var requestTarget = parts[1];
 
         var resolvedPath = baseDir.resolve(requestTarget.substring(1));
+        if (Files.isDirectory(resolvedPath)) {
+            resolvedPath = resolvedPath.resolve("index.html");
+        }
         if (Files.exists(resolvedPath)) {
             writeHeader(clientSocket, 200, "OK", "text/html; charset=utf-8");
             clientSocket.getOutputStream().write((Long.toHexString(Files.size(resolvedPath)) + "\r\n").getBytes());
