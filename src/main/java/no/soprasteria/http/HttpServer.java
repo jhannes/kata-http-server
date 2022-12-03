@@ -2,6 +2,7 @@ package no.soprasteria.http;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.nio.charset.StandardCharsets;
 
 @SuppressWarnings("resource")
 public class HttpServer {
@@ -11,7 +12,7 @@ public class HttpServer {
 
         var clientSocket = socket.accept();
 
-        var body = "hello world";
+        var body = "hallæ værden!";
         var response = "HTTP/1.1 200 OK\r\n" +
                        "Connection: close\r\n" +
                        "Content-Type: text/html\r\n" +
@@ -19,7 +20,7 @@ public class HttpServer {
                        "\r\n" +
                        body;
 
-        clientSocket.getOutputStream().write(response.getBytes());
+        clientSocket.getOutputStream().write(response.getBytes(StandardCharsets.ISO_8859_1));
 
         int c;
         while ((c = clientSocket.getInputStream().read()) != -1) {
