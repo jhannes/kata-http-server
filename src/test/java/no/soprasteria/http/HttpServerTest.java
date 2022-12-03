@@ -2,6 +2,7 @@ package no.soprasteria.http;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -16,5 +17,9 @@ class HttpServerTest {
         server.startServer();
         var connection = (HttpURLConnection) new URL(server.getURL(), "/unknown-url").openConnection();
         assertEquals(404, connection.getResponseCode());
+
+        var buffer = new ByteArrayOutputStream();
+        connection.getErrorStream().transferTo(buffer);
+        assertEquals("Unknown file /unknown-url", buffer.toString());
     }
 }
