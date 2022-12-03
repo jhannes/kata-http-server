@@ -1,8 +1,10 @@
 package no.soprasteria.http;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 @SuppressWarnings("resource")
@@ -18,7 +20,7 @@ public class HttpServer {
         socket = new ServerSocket(port);
     }
 
-    private void startServer() throws IOException {
+    void startServer() throws IOException {
         while (!Thread.interrupted()) {
             var clientSocket = socket.accept();
             handleRequest(clientSocket);
@@ -46,5 +48,9 @@ public class HttpServer {
         }
 
          */
+    }
+
+    public URL getURL() throws MalformedURLException {
+        return new URL("http", "localhost", socket.getLocalPort(), "/");
     }
 }
