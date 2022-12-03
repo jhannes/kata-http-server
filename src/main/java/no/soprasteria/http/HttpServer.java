@@ -41,7 +41,7 @@ public class HttpServer {
                 """;
         clientSocket.getOutputStream().write(responseHeader.getBytes(StandardCharsets.UTF_8));
 
-        var body = "hallå værden!";
+        var body = "Unknown file /unknown-url";
         var contentLength = body.getBytes(StandardCharsets.UTF_8).length;
         clientSocket.getOutputStream().write((Integer.toHexString(contentLength) + "\r\n" +
                                               body + "\r\n" +
