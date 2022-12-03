@@ -32,18 +32,20 @@ public class HttpServer {
     }
 
     private static void handleRequest(Socket clientSocket) throws IOException {
-        var body = "hallæ værden!";
-        var contentLength = body.getBytes(StandardCharsets.UTF_8).length;
-        var response = "HTTP/1.1 404 NOT FOUND\r\n" +
-                       "Connection: close\r\n" +
-                       "Content-Type: text/html; charset=utf-8\r\n" +
-                       "Transfer-Encoding: chunked\r\n" +
-                       "\r\n" +
-                       Integer.toHexString(contentLength) + "\r\n" +
-                       body + "\r\n" +
-                       0 + "\r\n\r\n";
+        var responseHeader = """
+                HTTP/1.1 404 NOT FOUND\r
+                Connection: close\r
+                Transfer-Encoding: chunked\r
+                Content-Type: text/html; charset=utf-8\r
+                \r
+                """;
+        clientSocket.getOutputStream().write(responseHeader.getBytes(StandardCharsets.UTF_8));
 
-        clientSocket.getOutputStream().write(response.getBytes(StandardCharsets.UTF_8));
+        var body = "hallå værden!";
+        var contentLength = body.getBytes(StandardCharsets.UTF_8).length;
+        clientSocket.getOutputStream().write((Integer.toHexString(contentLength) + "\r\n" +
+                                              body + "\r\n" +
+                                              0 + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
 
         /*
         int c;
