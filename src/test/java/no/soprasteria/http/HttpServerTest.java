@@ -57,6 +57,13 @@ class HttpServerTest {
         assertEquals(content, asString(connection.getInputStream()));
     }
 
+    @Test
+    void shouldResolveContentType() throws IOException {
+        Files.writeString(baseDir.resolve("style.css"), "body { background: red; }");
+        var connection = getOpenConnection("/style.css");
+        assertEquals(200, connection.getResponseCode());
+        assertEquals("text/css; charset=utf-8", connection.getHeaderField("Content-Type"));
+    }
 
 
     private static String asString(InputStream stream) throws IOException {

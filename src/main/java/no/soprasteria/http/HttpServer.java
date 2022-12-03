@@ -34,6 +34,7 @@ public class HttpServer {
                     e.printStackTrace();
                 }
             }
+            System.out.println("Terminated server");
         }).start();
     }
 
@@ -48,13 +49,15 @@ public class HttpServer {
             resolvedPath = resolvedPath.resolve("index.html");
         }
         if (Files.exists(resolvedPath)) {
-            writeHeader(clientSocket, 200, "OK", "text/html; charset=utf-8");
+            var contentType = "text/html; charset=utf-8";
+            writeHeader(clientSocket, 200, "OK", contentType);
             clientSocket.getOutputStream().write((Long.toHexString(Files.size(resolvedPath)) + "\r\n").getBytes());
             try (var inputStream = new FileInputStream(resolvedPath.toFile())) {
                 inputStream.transferTo(clientSocket.getOutputStream());
             }
             clientSocket.getOutputStream().write(("\r\n" + 0 + "\r\n\r\n").getBytes());
         } else {
+            System.out.println("404");
             writeHeader(clientSocket, 404, "NOT FOUND", "text/html; charset=utf-8");
             writeResponseBody(clientSocket, "Unknown file " + requestTarget);
         }
