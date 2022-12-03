@@ -70,8 +70,10 @@ class HttpServerTest {
         var connection = getOpenConnection("/api/login");
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
+        connection.setInstanceFollowRedirects(false);
         connection.getOutputStream().write("username=johannes".getBytes());
         assertEquals(302, connection.getResponseCode());
+        assertEquals(server.getURL().toString(), connection.getHeaderField("Location"));
     }
 
     private static String asString(InputStream stream) throws IOException {
