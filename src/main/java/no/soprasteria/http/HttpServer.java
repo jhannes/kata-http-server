@@ -49,11 +49,15 @@ public class HttpServer {
         var headers = readHeaders(clientSocket.getInputStream());
 
         if (requestTarget.equals("/api/login")) {
+            var postBody = readBody(clientSocket.getInputStream(), Integer.parseInt(headers.get("Content-Length")));
+            var formParams = parseQueryParams(postBody);
+            var username = formParams.get("username");
             var host = headers.get("Host");
             var location = "http://" + host + "/";
             var responseHeader = "HTTP/1.1 " + 302 + " " + "MOVED" + "\r\n" +
                                  "Connection: close\r\n" +
                                  "Location: " + location + "\r\n" +
+                                 "Set-Cookie: user=" + username + "\r\n" +
                                  "\r\n";
             clientSocket.getOutputStream().write(responseHeader.getBytes());
             return;
@@ -81,11 +85,28 @@ public class HttpServer {
         }
     }
 
+    private Map<String, String> parseQueryParams(String query) {
+        var result = new HashMap<String, String>();
+        for (String queryParam : query.split("&")) {
+            var parts = queryParam.split("\\s*=\\s*", 2);
+            result.put(parts[0], parts[1]);
+        }
+        return result;
+    }
+
+    private String readBody(InputStream inputStream, int contentLength) throws IOException {
+        var result = new StringBuilder();
+        for (int i = 0; i < contentLength; i++) {
+            result.append((char) inputStream.read());
+        }
+        return result.toString();
+    }
+
     private Map<String, String> readHeaders(InputStream inputStream) throws IOException {
         var result = new HashMap<String, String>();
         String line;
         while (!(line = readLine(inputStream)).isEmpty()) {
-            var parts = line.split(":\\s+", 2);
+            var parts = line.split(":\\s*", 2);
             result.put(parts[0], parts[1]);
         }
         return result;
