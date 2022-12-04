@@ -32,7 +32,7 @@ public class HttpServer {
             while (!Thread.interrupted()) {
                 try (var clientSocket = socket.accept()) {
                     handleRequest(clientSocket);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -44,23 +44,26 @@ public class HttpServer {
         var requestLine = readLine(clientSocket.getInputStream());
         System.out.println(requestLine);
         var parts = requestLine.split(" ");
+        var requestMethod = parts[0];
         var requestTarget = parts[1];
 
         var headers = readHeaders(clientSocket.getInputStream());
 
         if (requestTarget.equals("/api/login")) {
-            var postBody = readBody(clientSocket.getInputStream(), Integer.parseInt(headers.get("Content-Length")));
-            var formParams = parseQueryParams(postBody);
-            var username = formParams.get("username");
-            var host = headers.get("Host");
-            var location = "http://" + host + "/";
-            var responseHeader = "HTTP/1.1 " + 302 + " " + "MOVED" + "\r\n" +
-                                 "Connection: close\r\n" +
-                                 "Location: " + location + "\r\n" +
-                                 "Set-Cookie: user=" + username + "\r\n" +
-                                 "\r\n";
-            clientSocket.getOutputStream().write(responseHeader.getBytes());
-            return;
+            if (requestMethod.equals("POST")) {
+                var postBody = readBody(clientSocket.getInputStream(), Integer.parseInt(headers.get("Content-Length")));
+                var formParams = parseQueryParams(postBody);
+                var username = formParams.get("username");
+                var host = headers.get("Host");
+                var location = "http://" + host + "/";
+                var responseHeader = "HTTP/1.1 " + 302 + " " + "MOVED" + "\r\n" +
+                                     "Connection: close\r\n" +
+                                     "Location: " + location + "\r\n" +
+                                     "Set-Cookie: user=" + username + "\r\n" +
+                                     "\r\n";
+                clientSocket.getOutputStream().write(responseHeader.getBytes());
+                return;
+            }
         }
 
         var resolvedPath = baseDir.resolve(requestTarget.substring(1));

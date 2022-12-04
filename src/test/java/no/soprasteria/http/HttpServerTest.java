@@ -31,7 +31,7 @@ class HttpServerTest {
     @Test
     void shouldRespondWith404ToUnknownPages() throws IOException {
         var path = "/unknown-url-" + random.nextInt();
-        var connection = getOpenConnection(path);
+        var connection = openConnection(path);
         assertEquals(404, connection.getResponseCode());
         assertEquals("Unknown file " + path, asString(connection.getErrorStream()));
     }
@@ -41,7 +41,7 @@ class HttpServerTest {
         var newFile = "new-file-" + random.nextInt();
         var content = LocalDateTime.now().toString();
         Files.writeString(baseDir.resolve(newFile), content);
-        var connection = getOpenConnection("/" + newFile);
+        var connection = openConnection("/" + newFile);
         assertEquals(200, connection.getResponseCode());
         assertEquals(content, asString(connection.getInputStream()));
     }
@@ -52,7 +52,7 @@ class HttpServerTest {
         Files.createDirectories(newDir);
         var content = LocalDateTime.now().toString();
         Files.writeString(newDir.resolve("index.html"), content);
-        var connection = getOpenConnection("/" + newDir.getFileName());
+        var connection = openConnection("/" + newDir.getFileName());
         assertEquals(200, connection.getResponseCode());
         assertEquals(content, asString(connection.getInputStream()));
     }
@@ -60,14 +60,14 @@ class HttpServerTest {
     @Test
     void shouldResolveContentType() throws IOException {
         Files.writeString(baseDir.resolve("style.css"), "body { background: red; }");
-        var connection = getOpenConnection("/style.css");
+        var connection = openConnection("/style.css");
         assertEquals(200, connection.getResponseCode());
         assertEquals("text/css; charset=utf-8", connection.getHeaderField("Content-Type"));
     }
 
     @Test
     void shouldLogIn() throws IOException {
-        var connection = getOpenConnection("/api/login");
+        var connection = openConnection("/api/login");
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
         connection.setInstanceFollowRedirects(false);
@@ -77,13 +77,21 @@ class HttpServerTest {
         assertEquals("user=johannes", connection.getHeaderField("Set-Cookie"));
     }
 
+    @Test
+    void shouldShowLoginInformation() throws IOException {
+        var connection = openConnection("/api/login");
+        connection.setRequestProperty("Cookie", "user=testuser");
+        assertEquals(200, connection.getResponseCode());
+        assertEquals("Username: testuser", asString(connection.getInputStream()));
+    }
+
     private static String asString(InputStream stream) throws IOException {
         var buffer = new ByteArrayOutputStream();
         stream.transferTo(buffer);
         return buffer.toString();
     }
 
-    private HttpURLConnection getOpenConnection(String path) throws IOException {
+    private HttpURLConnection openConnection(String path) throws IOException {
         return (HttpURLConnection) new URL(server.getURL(), path).openConnection();
     }
 }
