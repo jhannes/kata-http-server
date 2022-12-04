@@ -62,8 +62,13 @@ public class HttpServer {
                                      "Set-Cookie: user=" + username + "\r\n" +
                                      "\r\n";
                 clientSocket.getOutputStream().write(responseHeader.getBytes());
-                return;
+            } else if (requestMethod.equals("GET")) {
+                var cookies = parseCookies(headers.get("Cookie"));
+
+                writeHeader(clientSocket, 200, "OK", "text/html; charset=utf-8");
+                writeResponseBody(clientSocket, "Username: " + cookies.get("user"));
             }
+            return;
         }
 
         var resolvedPath = baseDir.resolve(requestTarget.substring(1));
@@ -86,6 +91,17 @@ public class HttpServer {
             writeHeader(clientSocket, 404, "NOT FOUND", "text/html; charset=utf-8");
             writeResponseBody(clientSocket, "Unknown file " + requestTarget);
         }
+    }
+
+    private Map<String, String> parseCookies(String cookie) {
+        var result = new HashMap<String, String>();
+        if (cookie != null) {
+            for (String cookieString : cookie.split(";\\s*")) {
+                var parts = cookieString.split("=", 2);
+                result.put(parts[0], parts[1]);
+            }
+        }
+        return result;
     }
 
     private Map<String, String> parseQueryParams(String query) {
