@@ -7,11 +7,13 @@ import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class HttpServer {
 
@@ -51,22 +53,9 @@ public class HttpServer {
 
         if (requestTarget.equals("/api/login")) {
             if (requestMethod.equals("POST")) {
-                var postBody = readBody(clientSocket.getInputStream(), Integer.parseInt(headers.get("Content-Length")));
-                var formParams = parseQueryParams(postBody);
-                var username = formParams.get("username");
-                var host = headers.get("Host");
-                var location = "http://" + host + "/";
-                var responseHeader = "HTTP/1.1 " + 302 + " " + "MOVED" + "\r\n" +
-                                     "Connection: close\r\n" +
-                                     "Location: " + location + "\r\n" +
-                                     "Set-Cookie: user=" + username + "\r\n" +
-                                     "\r\n";
-                clientSocket.getOutputStream().write(responseHeader.getBytes());
+                doPostLogin(clientSocket, headers);
             } else if (requestMethod.equals("GET")) {
-                var cookies = parseCookies(headers.get("Cookie"));
-
-                writeHeader(clientSocket, 200, "OK", "text/html; charset=utf-8");
-                writeResponseBody(clientSocket, "Username: " + cookies.get("user"));
+                doGetLogin(clientSocket, headers);
             }
             return;
         }
@@ -76,16 +65,12 @@ public class HttpServer {
             resolvedPath = resolvedPath.resolve("index.html");
         }
         if (Files.exists(resolvedPath)) {
-            var contentType = "text/html; charset=utf-8";
-            if (resolvedPath.getFileName().toString().endsWith(".css")) {
-                contentType = "text/css; charset=utf-8";
-            }
-            writeHeader(clientSocket, 200, "OK", contentType);
+            writeHeader(clientSocket, 200, "OK", getContentType(resolvedPath));
             clientSocket.getOutputStream().write((Long.toHexString(Files.size(resolvedPath)) + "\r\n").getBytes());
             try (var inputStream = new FileInputStream(resolvedPath.toFile())) {
                 inputStream.transferTo(clientSocket.getOutputStream());
             }
-            clientSocket.getOutputStream().write(("\r\n" + 0 + "\r\n\r\n").getBytes());
+            clientSocket.getOutputStream().write(("\r\n0\r\n\r\n").getBytes());
         } else {
             System.out.println("404");
             writeHeader(clientSocket, 404, "NOT FOUND", "text/html; charset=utf-8");
@@ -93,13 +78,41 @@ public class HttpServer {
         }
     }
 
-    private Map<String, String> parseCookies(String cookie) {
+    private void doGetLogin(Socket clientSocket, Map<String, String> headers) throws IOException {
+        var cookies = parseCookies(headers.get("Cookie"));
+        var user = URLDecoder.decode(cookies.get("user"), UTF_8);
+        writeHeader(clientSocket, 200, "OK", "text/html; charset=utf-8");
+        writeResponseBody(clientSocket, "Username: " + user);
+    }
+
+    private void doPostLogin(Socket clientSocket, Map<String, String> headers) throws IOException {
+        var postBody = readBody(clientSocket.getInputStream(), Integer.parseInt(headers.get("Content-Length")));
+        var formParams = parseQueryParams(postBody);
+        var username = formParams.get("username");
+        var host = headers.get("Host");
+        var location = "http://" + host + "/";
+        var responseHeader = "HTTP/1.1 " + 302 + " " + "MOVED" + "\r\n" +
+                             "Connection: close\r\n" +
+                             "Location: " + location + "\r\n" +
+                             "Set-Cookie: user=" + username + "\r\n" +
+                             "\r\n";
+        clientSocket.getOutputStream().write(responseHeader.getBytes());
+    }
+
+    private static String getContentType(Path resolvedPath) {
+        var filename = resolvedPath.getFileName().toString();
+        if (filename.endsWith(".css")) {
+            return "text/css; charset=utf-8";
+        }
+        return "text/html; charset=utf-8";
+    }
+
+    private Map<String, String> readHeaders(InputStream inputStream) throws IOException {
         var result = new HashMap<String, String>();
-        if (cookie != null) {
-            for (String cookieString : cookie.split(";\\s*")) {
-                var parts = cookieString.split("=", 2);
-                result.put(parts[0], parts[1]);
-            }
+        String line;
+        while (!(line = readLine(inputStream)).isEmpty()) {
+            var parts = line.split(":\\s*", 2);
+            result.put(parts[0], parts[1]);
         }
         return result;
     }
@@ -113,6 +126,18 @@ public class HttpServer {
         return result;
     }
 
+    private Map<String, String> parseCookies(String cookie) {
+        var result = new HashMap<String, String>();
+        if (cookie != null) {
+            for (String cookieString : cookie.split(";\\s*")) {
+                var parts = cookieString.split("=", 2);
+                result.put(parts[0], parts[1]);
+            }
+        }
+        return result;
+    }
+
+
     private String readBody(InputStream inputStream, int contentLength) throws IOException {
         var result = new StringBuilder();
         for (int i = 0; i < contentLength; i++) {
@@ -121,21 +146,11 @@ public class HttpServer {
         return result.toString();
     }
 
-    private Map<String, String> readHeaders(InputStream inputStream) throws IOException {
-        var result = new HashMap<String, String>();
-        String line;
-        while (!(line = readLine(inputStream)).isEmpty()) {
-            var parts = line.split(":\\s*", 2);
-            result.put(parts[0], parts[1]);
-        }
-        return result;
-    }
-
     private static void writeResponseBody(Socket clientSocket, String body) throws IOException {
         var contentLength = body.getBytes().length;
         clientSocket.getOutputStream().write((Integer.toHexString(contentLength) + "\r\n" +
                                               body + "\r\n" +
-                                              0 + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+                                              0 + "\r\n\r\n").getBytes(UTF_8));
     }
 
     private static void writeHeader(Socket clientSocket, int responseCode, String responseMessage, String contentType) throws IOException {
@@ -144,7 +159,7 @@ public class HttpServer {
                              "Transfer-Encoding: chunked\r\n" +
                              "Content-Type: " + contentType + "\r\n" +
                              "\r\n";
-        clientSocket.getOutputStream().write(responseHeader.getBytes(StandardCharsets.UTF_8));
+        clientSocket.getOutputStream().write(responseHeader.getBytes(UTF_8));
     }
 
     private static String readLine(InputStream inputStream) throws IOException {
@@ -153,6 +168,7 @@ public class HttpServer {
         while ((c = inputStream.read()) != '\r') {
             result.append((char) c);
         }
+        //noinspection ResultOfMethodCallIgnored
         inputStream.read();
         return result.toString();
     }
