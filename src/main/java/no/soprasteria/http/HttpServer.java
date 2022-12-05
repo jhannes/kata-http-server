@@ -29,9 +29,9 @@ public class HttpServer {
     }
 
     private static void handleClient(Socket clientSocket) throws IOException {
-        var content = "Hello There";
+        var content = "Not found";
         clientSocket.getOutputStream().write("""
-                HTTP/1.1 200 OK\r
+                HTTP/1.1 404 NOT FOUND\r
                 Content-Length: %d\r
                 Connection: close\r
                 \r
