@@ -9,6 +9,17 @@ public class HttpServer {
         @SuppressWarnings("resource") var serverSocket = new ServerSocket(8080);
 
         var clientSocket = serverSocket.accept();
+
+        var content = "Hello World";
+        clientSocket.getOutputStream().write("""
+                HTTP/1.1 200 OK\r
+                Content-Length: %d\r
+                Connection: close\r
+                \r
+                %s
+                """.formatted(content.length(), content).getBytes());
+
+
         int c;
         while ((c = clientSocket.getInputStream().read()) != -1) {
             System.out.print((char)c);
