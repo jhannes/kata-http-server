@@ -19,7 +19,7 @@ public class HttpServer {
     }
 
     public static void main(String[] args) throws IOException {
-        new HttpServer(8080, null).start();
+        new HttpServer(8080, Path.of("src", "main", "resources")).start();
     }
 
     void start() {
