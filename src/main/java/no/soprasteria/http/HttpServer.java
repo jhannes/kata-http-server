@@ -2,19 +2,28 @@ package no.soprasteria.http;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 
 public class HttpServer {
 
+    private final ServerSocket serverSocket;
+
+    public HttpServer(int port) throws IOException {
+        serverSocket = new ServerSocket(port);
+    }
+
     public static void main(String[] args) throws IOException {
-        new HttpServer().start();
+        new HttpServer(8080).start();
     }
 
     private void start() throws IOException {
-        @SuppressWarnings("resource") var serverSocket = new ServerSocket(8080);
-
         var clientSocket = serverSocket.accept();
 
-        var content = "Hello World";
+        handleClient(clientSocket);
+    }
+
+    private static void handleClient(Socket clientSocket) throws IOException {
+        var content = "Hello There";
         clientSocket.getOutputStream().write("""
                 HTTP/1.1 200 OK\r
                 Content-Length: %d\r
