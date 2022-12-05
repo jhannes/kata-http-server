@@ -50,46 +50,56 @@ public class HttpServer {
                 handlePostLogin(clientSocket, requestHeaders);
                 return;
             } else if (requestMethod.equals("GET")) {
-                var cookieHeader = requestHeaders.get("Cookie");
-                var cookies = new HashMap<>();
-                for (var cookie : cookieHeader.split(";\\s*")) {
-                    var cookieParts = cookie.split("=", 2);
-                    cookies.put(cookieParts[0], cookieParts[1]);
-                }
-
-                var content = "Welcome, " + cookies.get("user");
-                clientSocket.getOutputStream().write("""
-                        HTTP/1.1 200 OK\r
-                        Content-Length: %d\r
-                        Connection: close\r
-                        \r
-                        %s""".formatted(content.length(), content).getBytes());
+                handleGetLogin(clientSocket, requestHeaders);
                 return;
             }
         }
-
 
         var requestPath = basePath.resolve(requestTarget.substring(1));
         if (Files.isDirectory(requestPath)) {
             requestPath = requestPath.resolve("index.html");
         }
         if (Files.isRegularFile(requestPath)) {
-            clientSocket.getOutputStream().write("""
-                    HTTP/1.1 200 OK\r
-                    Content-Length: %d\r
-                    Connection: close\r
-                    \r
-                    """.formatted(Files.size(requestPath)).getBytes());
-            try (var content = new FileInputStream(requestPath.toFile())) {
-                content.transferTo(clientSocket.getOutputStream());
-            }
+            handleFileContent(clientSocket, requestPath);
             return;
         }
 
+        handleNotFound(clientSocket, requestTarget);
+    }
 
+    private static void handleNotFound(Socket clientSocket, String requestTarget) throws IOException {
         var content = "Not found " + requestTarget;
         clientSocket.getOutputStream().write("""
                 HTTP/1.1 404 NOT FOUND\r
+                Content-Length: %d\r
+                Connection: close\r
+                \r
+                %s""".formatted(content.length(), content).getBytes());
+    }
+
+    private static void handleFileContent(Socket clientSocket, Path requestPath) throws IOException {
+        clientSocket.getOutputStream().write("""
+                HTTP/1.1 200 OK\r
+                Content-Length: %d\r
+                Connection: close\r
+                \r
+                """.formatted(Files.size(requestPath)).getBytes());
+        try (var content = new FileInputStream(requestPath.toFile())) {
+            content.transferTo(clientSocket.getOutputStream());
+        }
+    }
+
+    private static void handleGetLogin(Socket clientSocket, Map<String, String> requestHeaders) throws IOException {
+        var cookieHeader = requestHeaders.get("Cookie");
+        var cookies = new HashMap<>();
+        for (var cookie : cookieHeader.split(";\\s*")) {
+            var cookieParts = cookie.split("=", 2);
+            cookies.put(cookieParts[0], cookieParts[1]);
+        }
+
+        var content = "Welcome, " + cookies.get("user");
+        clientSocket.getOutputStream().write("""
+                HTTP/1.1 200 OK\r
                 Content-Length: %d\r
                 Connection: close\r
                 \r
