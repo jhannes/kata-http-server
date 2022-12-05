@@ -71,6 +71,7 @@ public class HttpServer {
         var line = new StringBuilder();
         int c;
         while ((c = clientSocket.getInputStream().read()) != '\r') {
+            if (c == -1) break;
             line.append((char) c);
         }
         return line.toString();

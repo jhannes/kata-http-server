@@ -61,6 +61,17 @@ class HttpServerTest {
         assertEquals(content, asString(connection.getInputStream()));
     }
 
+    @Test
+    void shouldPostToLogin() throws IOException {
+        var connection = openConnection("/api/login");
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+        connection.getOutputStream().write("username=test-user-name".getBytes());
+        assertEquals(302, connection.getResponseCode());
+        assertEquals(new URL(server.getURL(), "/").toString(), connection.getHeaderField("Location"));
+        assertEquals("user=test-user-name", connection.getHeaderField("Set-Cookie"));
+    }
+
     private static String asString(InputStream inputStream) throws IOException {
         var responseBuffer = new ByteArrayOutputStream();
         inputStream.transferTo(responseBuffer);
