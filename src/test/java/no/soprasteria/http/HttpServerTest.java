@@ -67,6 +67,7 @@ class HttpServerTest {
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
         connection.getOutputStream().write("username=test-user-name".getBytes());
+        connection.setInstanceFollowRedirects(false);
         assertEquals(302, connection.getResponseCode());
         assertEquals(new URL(server.getURL(), "/").toString(), connection.getHeaderField("Location"));
         assertEquals("user=test-user-name", connection.getHeaderField("Set-Cookie"));

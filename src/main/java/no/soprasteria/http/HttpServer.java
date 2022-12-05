@@ -45,13 +45,22 @@ public class HttpServer {
 
         if (requestTarget.equals("/api/login")) {
             var requestHeaders = readRequestHeaders(clientSocket.getInputStream());
+            var requestBody = readBody(clientSocket.getInputStream(), Integer.parseInt(requestHeaders.get("Content-Length")));
+            var queryParameters = new HashMap<>();
+            for (String queryParam : requestBody.split("&")) {
+                var parts = queryParam.split("=", 2);
+                queryParameters.put(parts[0], parts[1]);
+            }
+            var username = queryParameters.get("username");
+
             var host = requestHeaders.get("Host");
             var redirectUrl = "http://" + host + "/";
             clientSocket.getOutputStream().write("""
                 HTTP/1.1 302 MOVED\r
                 Connection: close\r
                 Location: %s\r
-                \r""".formatted(redirectUrl).getBytes());
+                Set-Cookie: user=%s
+                \r""".formatted(redirectUrl, username).getBytes());
             return;
         }
 
@@ -81,6 +90,14 @@ public class HttpServer {
                 Connection: close\r
                 \r
                 %s""".formatted(content.length(), content).getBytes());
+    }
+
+    private String readBody(InputStream inputStream, int length) throws IOException {
+        var body = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            body.append((char) inputStream.read());
+        }
+        return body.toString();
     }
 
     private static Map<String, String> readRequestHeaders(InputStream inputStream) throws IOException {
