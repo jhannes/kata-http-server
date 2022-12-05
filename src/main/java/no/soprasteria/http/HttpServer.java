@@ -38,7 +38,7 @@ public class HttpServer {
 
         var requestPath = basePath.resolve(requestTarget.substring(1));
         if (Files.isRegularFile(requestPath)) {
-            var content = "Hello world";
+            var content = Files.readString(requestPath);
             clientSocket.getOutputStream().write("""
                 HTTP/1.1 200 OK\r
                 Content-Length: %d\r
