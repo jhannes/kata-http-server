@@ -41,12 +41,31 @@ public class HttpServer {
 
     private void handleClient(Socket clientSocket) throws IOException {
         var requestLine = readLine(clientSocket.getInputStream()).split(" ");
+        var requestMethod = requestLine[0];
         var requestTarget = requestLine[1];
 
         if (requestTarget.equals("/api/login")) {
             var requestHeaders = readRequestHeaders(clientSocket.getInputStream());
-            handlePostLogin(clientSocket, requestHeaders);
-            return;
+            if (requestMethod.equals("POST")) {
+                handlePostLogin(clientSocket, requestHeaders);
+                return;
+            } else if (requestMethod.equals("GET")) {
+                var cookieHeader = requestHeaders.get("Cookie");
+                var cookies = new HashMap<>();
+                for (var cookie : cookieHeader.split(";\\s*")) {
+                    var cookieParts = cookie.split("=", 2);
+                    cookies.put(cookieParts[0], cookieParts[1]);
+                }
+
+                var content = "Welcome, " + cookies.get("user");
+                clientSocket.getOutputStream().write("""
+                        HTTP/1.1 200 OK\r
+                        Content-Length: %d\r
+                        Connection: close\r
+                        \r
+                        %s""".formatted(content.length(), content).getBytes());
+                return;
+            }
         }
 
 
@@ -56,11 +75,11 @@ public class HttpServer {
         }
         if (Files.isRegularFile(requestPath)) {
             clientSocket.getOutputStream().write("""
-                HTTP/1.1 200 OK\r
-                Content-Length: %d\r
-                Connection: close\r
-                \r
-                """.formatted(Files.size(requestPath)).getBytes());
+                    HTTP/1.1 200 OK\r
+                    Content-Length: %d\r
+                    Connection: close\r
+                    \r
+                    """.formatted(Files.size(requestPath)).getBytes());
             try (var content = new FileInputStream(requestPath.toFile())) {
                 content.transferTo(clientSocket.getOutputStream());
             }
@@ -89,11 +108,11 @@ public class HttpServer {
         var host = requestHeaders.get("Host");
         var redirectUrl = "http://" + host + "/";
         clientSocket.getOutputStream().write("""
-            HTTP/1.1 302 MOVED\r
-            Connection: close\r
-            Location: %s\r
-            Set-Cookie: user=%s
-            \r""".formatted(redirectUrl, username).getBytes());
+                HTTP/1.1 302 MOVED\r
+                Connection: close\r
+                Location: %s\r
+                Set-Cookie: user=%s
+                \r""".formatted(redirectUrl, username).getBytes());
     }
 
     private String readBody(InputStream inputStream, int length) throws IOException {
