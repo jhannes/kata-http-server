@@ -5,14 +5,17 @@ import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class HttpServer {
 
     private final ServerSocket serverSocket;
+    private final Path basePath;
 
-    public HttpServer(int port, Path dir) throws IOException {
+    public HttpServer(int port, Path basePath) throws IOException {
         serverSocket = new ServerSocket(port);
+        this.basePath = basePath;
     }
 
     public static void main(String[] args) throws IOException {
@@ -29,9 +32,22 @@ public class HttpServer {
         }).start();
     }
 
-    private static void handleClient(Socket clientSocket) throws IOException {
+    private void handleClient(Socket clientSocket) throws IOException {
         var requestLine = readLine(clientSocket).split(" ");
         var requestTarget = requestLine[1];
+
+        var requestPath = basePath.resolve(requestTarget.substring(1));
+        if (Files.isRegularFile(requestPath)) {
+            var content = "Hello world";
+            clientSocket.getOutputStream().write("""
+                HTTP/1.1 200 OK\r
+                Content-Length: %d\r
+                Connection: close\r
+                \r
+                %s""".formatted(content.length(), content).getBytes());
+            return;
+        }
+
 
         var content = "Not found " + requestTarget;
         clientSocket.getOutputStream().write("""
