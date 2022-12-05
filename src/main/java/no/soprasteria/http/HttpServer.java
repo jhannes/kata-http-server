@@ -29,12 +29,7 @@ public class HttpServer {
     }
 
     private static void handleClient(Socket clientSocket) throws IOException {
-        var line = new StringBuilder();
-        int c;
-        while ((c = clientSocket.getInputStream().read()) != '\r') {
-            line.append((char) c);
-        }
-        var requestLine = line.toString().split(" ");
+        var requestLine = readLine(clientSocket).split(" ");
         var requestTarget = requestLine[1];
 
         var content = "Not found " + requestTarget;
@@ -44,6 +39,15 @@ public class HttpServer {
                 Connection: close\r
                 \r
                 %s""".formatted(content.length(), content).getBytes());
+    }
+
+    private static String readLine(Socket clientSocket) throws IOException {
+        var line = new StringBuilder();
+        int c;
+        while ((c = clientSocket.getInputStream().read()) != '\r') {
+            line.append((char) c);
+        }
+        return line.toString();
     }
 
     public URL getURL() throws MalformedURLException {
