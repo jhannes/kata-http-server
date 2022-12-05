@@ -1,8 +1,10 @@
 package no.soprasteria.http;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 
 public class HttpServer {
 
@@ -16,7 +18,7 @@ public class HttpServer {
         new HttpServer(8080).start();
     }
 
-    private void start() throws IOException {
+    void start() throws IOException {
         var clientSocket = serverSocket.accept();
 
         handleClient(clientSocket);
@@ -37,5 +39,9 @@ public class HttpServer {
         while ((c = clientSocket.getInputStream().read()) != -1) {
             System.out.print((char)c);
         }
+    }
+
+    public URL getURL() throws MalformedURLException {
+        return new URL("http", "localhost", serverSocket.getLocalPort(), "/");
     }
 }
