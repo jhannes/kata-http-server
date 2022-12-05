@@ -1,5 +1,6 @@
 package no.soprasteria.http;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
@@ -44,13 +45,15 @@ public class HttpServer {
             requestPath = requestPath.resolve("index.html");
         }
         if (Files.isRegularFile(requestPath)) {
-            var content = Files.readString(requestPath);
             clientSocket.getOutputStream().write("""
                 HTTP/1.1 200 OK\r
                 Content-Length: %d\r
                 Connection: close\r
                 \r
-                %s""".formatted(content.length(), content).getBytes());
+                """.formatted(Files.size(requestPath)).getBytes());
+            try (var content = new FileInputStream(requestPath.toFile())) {
+                content.transferTo(clientSocket.getOutputStream());
+            }
             return;
         }
 
