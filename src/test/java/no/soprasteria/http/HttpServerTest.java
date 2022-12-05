@@ -36,6 +36,12 @@ class HttpServerTest {
     }
 
     @Test
+    void shouldHandleMultipleRequests() throws IOException {
+        assertEquals(404, openConnection("/no/such/file").getResponseCode());
+        assertEquals(404, openConnection("/no/such/file").getResponseCode());
+    }
+
+    @Test
     void shouldReturn200ForKnownFile() throws IOException {
         var filename = "test.txt";
         var content = LocalDateTime.now().toString();
