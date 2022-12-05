@@ -6,6 +6,10 @@ import java.net.ServerSocket;
 public class HttpServer {
 
     public static void main(String[] args) throws IOException {
+        new HttpServer().start();
+    }
+
+    private void start() throws IOException {
         @SuppressWarnings("resource") var serverSocket = new ServerSocket(8080);
 
         var clientSocket = serverSocket.accept();
