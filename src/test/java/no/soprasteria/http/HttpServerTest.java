@@ -43,6 +43,7 @@ class HttpServerTest {
 
         var connection = openConnection("/" + filename);
         assertEquals(200, connection.getResponseCode());
+        assertEquals(content, asString(connection.getInputStream()));
     }
 
     private static String asString(InputStream inputStream) throws IOException {
