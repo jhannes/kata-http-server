@@ -52,6 +52,15 @@ class HttpServerTest {
         assertEquals(content, asString(connection.getInputStream()));
     }
 
+    @Test
+    void shouldServeWelcomeFile() throws IOException {
+        var content = LocalDateTime.now().toString();
+        Files.writeString(dir.resolve("index.html"), content);
+        var connection = openConnection("/");
+        assertEquals(200, connection.getResponseCode());
+        assertEquals(content, asString(connection.getInputStream()));
+    }
+
     private static String asString(InputStream inputStream) throws IOException {
         var responseBuffer = new ByteArrayOutputStream();
         inputStream.transferTo(responseBuffer);
