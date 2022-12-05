@@ -73,6 +73,14 @@ class HttpServerTest {
         assertEquals("user=test-user-name", connection.getHeaderField("Set-Cookie"));
     }
 
+    @Test
+    void shouldGetLoginInformation() throws IOException {
+        var connection = openConnection("/api/login");
+        connection.setRequestProperty("Cookie", "user=foo");
+        assertEquals(200, connection.getResponseCode());
+        assertEquals("Welcome, foo", asString(connection.getInputStream()));
+    }
+
     private static String asString(InputStream inputStream) throws IOException {
         var responseBuffer = new ByteArrayOutputStream();
         inputStream.transferTo(responseBuffer);

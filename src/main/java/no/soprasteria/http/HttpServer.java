@@ -121,7 +121,8 @@ public class HttpServer {
             if (c == -1) break;
             line.append((char) c);
         }
-        if (c == '\r') inputStream.read();
+        if (c == '\r') //noinspection ResultOfMethodCallIgnored
+            inputStream.read();
         return line.toString();
     }
 
