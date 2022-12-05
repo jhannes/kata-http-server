@@ -2,12 +2,16 @@ package no.soprasteria.http;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,9 +19,12 @@ class HttpServerTest {
 
     private HttpServer server;
 
+    @TempDir
+    private Path dir;
+
     @BeforeEach
     void setUp() throws IOException {
-        server = new HttpServer(0);
+        server = new HttpServer(0, dir);
         server.start();
     }
 
@@ -26,6 +33,16 @@ class HttpServerTest {
         var connection = openConnection("/no/such/file");
         assertEquals(404, connection.getResponseCode());
         assertEquals("Not found /no/such/file", asString(connection.getErrorStream()));
+    }
+
+    @Test
+    void shouldReturn200ForKnownFile() throws IOException {
+        var filename = "test.txt";
+        var content = LocalDateTime.now().toString();
+        Files.writeString(dir.resolve(filename), content);
+
+        var connection = openConnection("/" + filename);
+        assertEquals(200, connection.getResponseCode());
     }
 
     private static String asString(InputStream inputStream) throws IOException {
