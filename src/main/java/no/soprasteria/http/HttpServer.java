@@ -24,11 +24,14 @@ public class HttpServer {
 
     void start() {
         new Thread(() -> {
-            try (var clientSocket = serverSocket.accept()) {
-                handleClient(clientSocket);
-            } catch (IOException e) {
-                e.printStackTrace();
+            while (!Thread.interrupted()) {
+                try (var clientSocket = serverSocket.accept()) {
+                    handleClient(clientSocket);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+            System.out.println("Exited");
         }).start();
     }
 
