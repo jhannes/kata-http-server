@@ -29,20 +29,21 @@ public class HttpServer {
     }
 
     private static void handleClient(Socket clientSocket) throws IOException {
-        var content = "Not found";
+        var line = new StringBuilder();
+        int c;
+        while ((c = clientSocket.getInputStream().read()) != '\r') {
+            line.append((char) c);
+        }
+        var requestLine = line.toString().split(" ");
+        var requestTarget = requestLine[1];
+
+        var content = "Not found " + requestTarget;
         clientSocket.getOutputStream().write("""
                 HTTP/1.1 404 NOT FOUND\r
                 Content-Length: %d\r
                 Connection: close\r
                 \r
-                %s
-                """.formatted(content.length(), content).getBytes());
-
-
-        int c;
-        while ((c = clientSocket.getInputStream().read()) != -1) {
-            System.out.print((char) c);
-        }
+                %s""".formatted(content.length(), content).getBytes());
     }
 
     public URL getURL() throws MalformedURLException {
