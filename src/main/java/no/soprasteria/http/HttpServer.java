@@ -18,10 +18,14 @@ public class HttpServer {
         new HttpServer(8080).start();
     }
 
-    void start() throws IOException {
-        var clientSocket = serverSocket.accept();
-
-        handleClient(clientSocket);
+    void start() {
+        new Thread(() -> {
+            try (var clientSocket = serverSocket.accept()) {
+                handleClient(clientSocket);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private static void handleClient(Socket clientSocket) throws IOException {
@@ -37,7 +41,7 @@ public class HttpServer {
 
         int c;
         while ((c = clientSocket.getInputStream().read()) != -1) {
-            System.out.print((char)c);
+            System.out.print((char) c);
         }
     }
 
