@@ -40,6 +40,9 @@ public class HttpServer {
         var requestTarget = requestLine[1];
 
         var requestPath = basePath.resolve(requestTarget.substring(1));
+        if (Files.isDirectory(requestPath)) {
+            requestPath = requestPath.resolve("index.html");
+        }
         if (Files.isRegularFile(requestPath)) {
             var content = Files.readString(requestPath);
             clientSocket.getOutputStream().write("""
