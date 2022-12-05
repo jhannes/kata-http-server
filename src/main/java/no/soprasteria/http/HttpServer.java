@@ -2,12 +2,15 @@ package no.soprasteria.http;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpServer {
 
@@ -37,14 +40,18 @@ public class HttpServer {
     }
 
     private void handleClient(Socket clientSocket) throws IOException {
-        var requestLine = readLine(clientSocket).split(" ");
+        var requestLine = readLine(clientSocket.getInputStream()).split(" ");
         var requestTarget = requestLine[1];
 
         if (requestTarget.equals("/api/login")) {
+            var requestHeaders = readRequestHeaders(clientSocket.getInputStream());
+            var host = requestHeaders.get("Host");
+            var redirectUrl = "http://" + host + "/";
             clientSocket.getOutputStream().write("""
                 HTTP/1.1 302 MOVED\r
                 Connection: close\r
-                \r""".getBytes());
+                Location: %s\r
+                \r""".formatted(redirectUrl).getBytes());
             return;
         }
 
@@ -76,13 +83,24 @@ public class HttpServer {
                 %s""".formatted(content.length(), content).getBytes());
     }
 
-    private static String readLine(Socket clientSocket) throws IOException {
+    private static Map<String, String> readRequestHeaders(InputStream inputStream) throws IOException {
+        var result = new HashMap<String, String>();
+        String line;
+        while (!(line = readLine(inputStream)).isEmpty()) {
+            var parts = line.split(":\\s+");
+            result.put(parts[0], parts[1]);
+        }
+        return result;
+    }
+
+    private static String readLine(InputStream inputStream) throws IOException {
         var line = new StringBuilder();
         int c;
-        while ((c = clientSocket.getInputStream().read()) != '\r') {
+        while ((c = inputStream.read()) != '\r') {
             if (c == -1) break;
             line.append((char) c);
         }
+        if (c == '\r') inputStream.read();
         return line.toString();
     }
 
