@@ -40,6 +40,15 @@ public class HttpServer {
         var requestLine = readLine(clientSocket).split(" ");
         var requestTarget = requestLine[1];
 
+        if (requestTarget.equals("/api/login")) {
+            clientSocket.getOutputStream().write("""
+                HTTP/1.1 302 MOVED\r
+                Connection: close\r
+                \r""".getBytes());
+            return;
+        }
+
+
         var requestPath = basePath.resolve(requestTarget.substring(1));
         if (Files.isDirectory(requestPath)) {
             requestPath = requestPath.resolve("index.html");
