@@ -50,6 +50,13 @@ class HttpServerTest {
     }
 
     @Test
+    void shouldServeBinaryFiles() throws IOException {
+        var file = "favicon.ico";
+        Files.copy(Path.of("src", "main", "resources", file), tempDir.resolve(file));
+        assertEquals(200, openConnection(file).getResponseCode());
+    }
+
+    @Test
     void shouldHandleMultipleRequests() throws IOException {
         assertEquals(404, openConnection("/some-path").getResponseCode());
         assertEquals(404, openConnection("/other-path").getResponseCode());
