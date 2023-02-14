@@ -104,13 +104,15 @@ public class HttpServerClient {
     }
 
     private void handleExistingFile(Path requestFile) throws IOException {
-        var body = Files.readString(requestFile);
         clientSocket.getOutputStream().write("""
                 HTTP/1.1 200 OK\r
                 Content-Length: %d\r
                 Connection: close\r
                 \r
-                %s""".formatted(body.length(), body).getBytes());
+                """.formatted(Files.size(requestFile)).getBytes());
+        try (var inputStream = Files.newInputStream(requestFile)) {
+            inputStream.transferTo(clientSocket.getOutputStream());
+        }
     }
 
     private Path resolveRequestTarget(String requestTarget) {
