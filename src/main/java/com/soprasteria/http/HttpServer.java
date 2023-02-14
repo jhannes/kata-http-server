@@ -19,7 +19,7 @@ public class HttpServer {
         try {
             var clientSocket = serverSocket.accept();
 
-            var body = "Unknown path";
+            var body = "Unknown path /unknown-path";
             clientSocket.getOutputStream().write("""
                     HTTP/1.1 404 Not found\r
                     Content-Length: %d\r
