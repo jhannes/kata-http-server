@@ -27,8 +27,9 @@ public class HttpServer {
             String requestLine = readLine(clientSocket);
             var requestTarget = requestLine.split(" ")[1];
 
-            if (Files.exists(httpRoot.resolve(requestTarget.substring(1)))) {
-                var body = "Data";
+            var requestFile = httpRoot.resolve(requestTarget.substring(1));
+            if (Files.exists(requestFile)) {
+                var body = Files.readString(requestFile);
                 clientSocket.getOutputStream().write("""
                     HTTP/1.1 200 OK\r
                     Content-Length: %d\r
