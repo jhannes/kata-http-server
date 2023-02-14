@@ -27,8 +27,10 @@ public class HttpServer {
                 }
                 line.append((char)c);
             }
+            var requestLine = line.toString();
+            var requestTarget = requestLine.split(" ")[1];
 
-            var body = "Unknown path " + line;
+            var body = "Unknown path " + requestTarget;
             clientSocket.getOutputStream().write("""
                     HTTP/1.1 404 Not found\r
                     Content-Length: %d\r
