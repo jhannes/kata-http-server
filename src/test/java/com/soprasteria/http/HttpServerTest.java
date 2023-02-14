@@ -41,6 +41,15 @@ class HttpServerTest {
     }
 
     @Test
+    void shouldServeWelcomeFile() throws IOException {
+        var content = "Hello World " + LocalTime.now();
+        Files.writeString(tempDir.resolve("index.html"), content);
+        var connection = openConnection("/");
+        assertEquals(200, connection.getResponseCode());
+        assertEquals(content, asString(connection.getInputStream()));
+    }
+
+    @Test
     void shouldHandleMultipleRequests() throws IOException {
         assertEquals(404, openConnection("/some-path").getResponseCode());
         assertEquals(404, openConnection("/other-path").getResponseCode());
