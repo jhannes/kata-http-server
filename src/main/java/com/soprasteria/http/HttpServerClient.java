@@ -46,11 +46,13 @@ public class HttpServerClient {
         if (requestMethod.equals("GET")) {
             handleGetLogin();
         } else {
+            var sessionCookie = "session=username";
             clientSocket.getOutputStream().write("""
                     HTTP/1.1 200 OK\r
                     Connection: close\r
+                    Set-Cookie: %s\r
                     \r
-                    """.getBytes());
+                    """.formatted(sessionCookie).getBytes());
         }
     }
 
