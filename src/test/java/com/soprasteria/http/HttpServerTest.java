@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -27,7 +28,7 @@ class HttpServerTest {
         var path = "/unknown-path-" + System.currentTimeMillis();
         var connection = openConnection(path);
         assertEquals(404, connection.getResponseCode());
-        assertEquals("Unknown path " + path, asString(connection));
+        assertEquals("Unknown path " + path, asString(connection.getErrorStream()));
     }
 
     @Test
@@ -36,12 +37,12 @@ class HttpServerTest {
         Files.writeString(tempDir.resolve("plain.txt"), content);
         var connection = openConnection("plain.txt");
         assertEquals(200, connection.getResponseCode());
-        assertEquals(content, asString(connection));
+        assertEquals(content, asString(connection.getInputStream()));
     }
 
-    private static String asString(HttpURLConnection connection) throws IOException {
+    private static String asString(InputStream inputStream) throws IOException {
         var buffer = new ByteArrayOutputStream();
-        connection.getErrorStream().transferTo(buffer);
+        inputStream.transferTo(buffer);
         return buffer.toString();
     }
 
