@@ -11,7 +11,7 @@ public class HttpServer {
 
         int c;
         while((c = clientSocket.getInputStream().read()) != -1) {
-            System.out.println(c);
+            System.out.print((char)c);
         }
     }
 }
