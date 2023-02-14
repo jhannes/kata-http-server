@@ -51,6 +51,13 @@ class HttpServerTest {
         assertEquals(401, openConnection("/api/login").getResponseCode());
     }
 
+    @Test
+    void shouldReturnUsernameForAuthorizedUsers() throws IOException {
+        var connection = openConnection("/api/login");
+        connection.setRequestProperty("Cookie", "session=johannes+brodwall");
+        assertEquals(200, connection.getResponseCode());
+    }
+
     private static String asString(InputStream inputStream) throws IOException {
         var buffer = new ByteArrayOutputStream();
         inputStream.transferTo(buffer);
