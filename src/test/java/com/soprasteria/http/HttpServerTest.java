@@ -54,8 +54,10 @@ class HttpServerTest {
     @Test
     void shouldReturnUsernameForAuthorizedUsers() throws IOException {
         var connection = openConnection("/api/login");
-        connection.setRequestProperty("Cookie", "session=johannes+brodwall");
+        var username = "johannes+brodwall+" + System.currentTimeMillis();
+        connection.setRequestProperty("Cookie", "session=" + username);
         assertEquals(200, connection.getResponseCode());
+        assertEquals("Logged in as " + username, asString(connection.getInputStream()));
     }
 
     private static String asString(InputStream inputStream) throws IOException {
