@@ -114,7 +114,11 @@ public class HttpServerClient {
     }
 
     private Path resolveRequestTarget(String requestTarget) {
-        return httpRoot.resolve(requestTarget.substring(1));
+        var result = httpRoot.resolve(requestTarget.substring(1));
+        if (Files.isDirectory(result)) {
+            return result.resolve("index.html");
+        }
+        return result;
     }
 
     private String readLine() throws IOException {
