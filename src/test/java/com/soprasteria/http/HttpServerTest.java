@@ -11,16 +11,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HttpServerTest {
 
+    private final HttpServer server = new HttpServer(0);
+
+    HttpServerTest() throws IOException {
+    }
+
     @Test
     void shouldReturn404ForUnknownPath() throws IOException {
-        var server = new HttpServer(0);
         var path = "/unknown-path-" + System.currentTimeMillis();
-        var connection = (HttpURLConnection) new URL(server.getURL(), path).openConnection();
+        var connection = openConnection(path);
         assertEquals(404, connection.getResponseCode());
+        assertEquals("Unknown path " + path, asString(connection));
+    }
+
+    private static String asString(HttpURLConnection connection) throws IOException {
         var buffer = new ByteArrayOutputStream();
         connection.getErrorStream().transferTo(buffer);
-        var responseBody = buffer.toString();
-        assertEquals("Unknown path " + path, responseBody);
+        return buffer.toString();
+    }
+
+    private HttpURLConnection openConnection(String path) throws IOException {
+        return (HttpURLConnection) new URL(server.getURL(), path).openConnection();
     }
 
 }

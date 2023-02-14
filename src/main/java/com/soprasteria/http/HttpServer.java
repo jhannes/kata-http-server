@@ -3,6 +3,7 @@ package com.soprasteria.http;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URL;
 
 public class HttpServer {
@@ -19,15 +20,7 @@ public class HttpServer {
         try {
             var clientSocket = serverSocket.accept();
 
-            var line = new StringBuilder();
-            int c;
-            while((c = clientSocket.getInputStream().read()) != -1) {
-                if (c == '\n') {
-                    break;
-                }
-                line.append((char)c);
-            }
-            var requestLine = line.toString();
+            String requestLine = readLine(clientSocket);
             var requestTarget = requestLine.split(" ")[1];
 
             var body = "Unknown path " + requestTarget;
@@ -42,6 +35,18 @@ public class HttpServer {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static String readLine(Socket clientSocket) throws IOException {
+        var line = new StringBuilder();
+        int c;
+        while((c = clientSocket.getInputStream().read()) != -1) {
+            if (c == '\n') {
+                break;
+            }
+            line.append((char)c);
+        }
+        return line.toString();
     }
 
     public URL getURL() throws MalformedURLException {
