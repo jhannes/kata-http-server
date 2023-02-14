@@ -19,9 +19,9 @@ public class HttpServer {
         try {
             var clientSocket = serverSocket.accept();
 
-            var body = "Hello there";
+            var body = "Unknown path";
             clientSocket.getOutputStream().write("""
-                    HTTP/1.1 200 OK\r
+                    HTTP/1.1 404 Not found\r
                     Content-Length: %d\r
                     Connection: close\r
                     Content-type: text/html\r
@@ -37,11 +37,11 @@ public class HttpServer {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        new HttpServer(8080);
-    }
-
     public URL getURL() throws MalformedURLException {
         return new URL("http", "localhost", serverSocket.getLocalPort(), "/");
+    }
+
+    public static void main(String[] args) throws IOException {
+        new HttpServer(8080);
     }
 }
