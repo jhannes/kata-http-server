@@ -65,6 +65,7 @@ class HttpServerTest {
         var username = "Johannes+Brodwall";
         var connection = openConnection("/api/login");
         connection.setRequestMethod("POST");
+        connection.setInstanceFollowRedirects(false);
         connection.setDoOutput(true);
         connection.getOutputStream().write(("username=" + username).getBytes());
 

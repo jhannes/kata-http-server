@@ -50,12 +50,14 @@ public class HttpServerClient {
             var parts = body.split("=");
             var username = parts[1];
             var sessionCookie = "session=" + username;
+            var location = "http://" + headers.get("Host") + "/";
             clientSocket.getOutputStream().write("""
-                    HTTP/1.1 200 OK\r
+                    HTTP/1.1 302 Moved\r
                     Connection: close\r
                     Set-Cookie: %s\r
+                    Location: %s\r
                     \r
-                    """.formatted(sessionCookie).getBytes());
+                    """.formatted(sessionCookie, location).getBytes());
         }
     }
 
