@@ -21,7 +21,7 @@ public class HttpServer {
     private void runServer() {
         try {
             var clientSocket = serverSocket.accept();
-            HttpServerClient.handleClient(clientSocket, httpRoot);
+            new HttpServerClient(clientSocket, httpRoot).handleClient(clientSocket, httpRoot);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

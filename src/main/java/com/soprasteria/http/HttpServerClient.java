@@ -7,12 +7,14 @@ import java.nio.file.Path;
 
 public class HttpServerClient {
     private final Socket clientSocket;
+    private final Path httpRoot;
 
-    public HttpServerClient(Socket clientSocket) {
+    public HttpServerClient(Socket clientSocket, Path httpRoot) {
         this.clientSocket = clientSocket;
+        this.httpRoot = httpRoot;
     }
 
-    static void handleClient(Socket clientSocket, Path httpRoot1) throws IOException {
+    void handleClient(Socket clientSocket, Path httpRoot1) throws IOException {
         String requestLine = readLine(clientSocket);
         var requestTarget = requestLine.split(" ")[1];
 
