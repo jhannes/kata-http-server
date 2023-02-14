@@ -14,11 +14,11 @@ public class HttpServerClient {
         this.httpRoot = httpRoot;
     }
 
-    void handleClient(Socket clientSocket, Path httpRoot1) throws IOException {
+    void handleClient() throws IOException {
         String requestLine = readLine(clientSocket);
         var requestTarget = requestLine.split(" ")[1];
 
-        var requestFile = httpRoot1.resolve(requestTarget.substring(1));
+        var requestFile = httpRoot.resolve(requestTarget.substring(1));
         if (Files.exists(requestFile)) {
             var body = Files.readString(requestFile);
             clientSocket.getOutputStream().write("""
