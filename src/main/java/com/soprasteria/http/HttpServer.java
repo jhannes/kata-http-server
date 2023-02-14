@@ -5,14 +5,17 @@ import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class HttpServer {
 
     private final ServerSocket serverSocket;
+    private final Path httpRoot;
 
-    HttpServer(int port, Path tempDir) throws IOException {
+    HttpServer(int port, Path httpRoot) throws IOException {
         serverSocket = new ServerSocket(port);
+        this.httpRoot = httpRoot;
 
         new Thread(this::runServer).start();
     }
@@ -24,15 +27,25 @@ public class HttpServer {
             String requestLine = readLine(clientSocket);
             var requestTarget = requestLine.split(" ")[1];
 
-            var body = "Unknown path " + requestTarget;
-            clientSocket.getOutputStream().write("""
+            if (Files.exists(httpRoot.resolve(requestTarget.substring(1)))) {
+                var body = "Data";
+                clientSocket.getOutputStream().write("""
+                    HTTP/1.1 200 OK\r
+                    Content-Length: %d\r
+                    Connection: close\r
+                    \r
+                    %s""".formatted(body.length(), body).getBytes());
+
+            } else {
+                var body = "Unknown path " + requestTarget;
+                clientSocket.getOutputStream().write("""
                     HTTP/1.1 404 Not found\r
                     Content-Length: %d\r
                     Connection: close\r
                     Content-type: text/html\r
                     \r
                     %s""".formatted(body.length(), body).getBytes());
-
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
