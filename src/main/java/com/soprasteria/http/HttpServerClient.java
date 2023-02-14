@@ -5,10 +5,12 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class HttpServerClient {
     private final Socket clientSocket;
     private final Path httpRoot;
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
     public HttpServerClient(Socket clientSocket, Path httpRoot) {
         this.clientSocket = clientSocket;
@@ -17,6 +19,7 @@ public class HttpServerClient {
 
     void handleClient() throws IOException {
         String requestLine = readLine();
+        readHeaders();
         var requestTarget = requestLine.split(" ")[1];
 
         var requestFile = resolveRequestTarget(requestTarget);
@@ -29,13 +32,15 @@ public class HttpServerClient {
         }
     }
 
-    private void handleLoginRequest() throws IOException {
-        var headers = new LinkedHashMap<String, String>();
+    private void readHeaders() throws IOException {
         String headerLine;
         while (!(headerLine = readLine().trim()).isEmpty()) {
             var parts = headerLine.split(":\\s*");
             headers.put(parts[0], parts[1]);
         }
+    }
+
+    private void handleLoginRequest() throws IOException {
         var cookie = headers.get("Cookie");
         if (cookie != null) {
             var parts = cookie.split("=");
