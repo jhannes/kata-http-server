@@ -62,9 +62,10 @@ class HttpServerTest {
 
     @Test
     void shouldSetCookieOnLogin() throws IOException {
+        var username = "Johannes+Brodwall";
         var connection = openConnection("/api/login");
         connection.setRequestMethod("POST");
-        var username = "Johannes+Brodwall";
+        connection.setDoOutput(true);
         connection.getOutputStream().write(("username=" + username).getBytes());
 
         assertEquals(200, connection.getResponseCode());
