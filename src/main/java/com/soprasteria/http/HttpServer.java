@@ -19,7 +19,16 @@ public class HttpServer {
         try {
             var clientSocket = serverSocket.accept();
 
-            var body = "Unknown path /unknown-path";
+            var line = new StringBuilder();
+            int c;
+            while((c = clientSocket.getInputStream().read()) != -1) {
+                if (c == '\n') {
+                    break;
+                }
+                line.append((char)c);
+            }
+
+            var body = "Unknown path " + line;
             clientSocket.getOutputStream().write("""
                     HTTP/1.1 404 Not found\r
                     Content-Length: %d\r
@@ -28,10 +37,6 @@ public class HttpServer {
                     \r
                     %s""".formatted(body.length(), body).getBytes());
 
-            int c;
-            while((c = clientSocket.getInputStream().read()) != -1) {
-                System.out.print((char)c);
-            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
