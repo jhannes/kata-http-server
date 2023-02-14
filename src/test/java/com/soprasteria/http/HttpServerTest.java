@@ -14,7 +14,7 @@ class HttpServerTest {
     @Test
     void shouldReturn404ForUnknownPath() throws IOException {
         var server = new HttpServer(0);
-        var path = "/unknown-path";
+        var path = "/unknown-path-" + System.currentTimeMillis();
         var connection = (HttpURLConnection) new URL(server.getURL(), path).openConnection();
         assertEquals(404, connection.getResponseCode());
         var buffer = new ByteArrayOutputStream();
