@@ -36,8 +36,10 @@ public class HttpServerClient {
             var parts = headerLine.split(":\\s*");
             headers.put(parts[0], parts[1]);
         }
-        if (headers.containsKey("Cookie")) {
-            var body = "Welcome!";
+        var cookie = headers.get("Cookie");
+        if (cookie != null) {
+            var parts = cookie.split("=");
+            var body = "Logged in as " + parts[1];
             clientSocket.getOutputStream().write("""
                     HTTP/1.1 200 OK\r
                     Content-Length: %d\r
