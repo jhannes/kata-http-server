@@ -1,14 +1,13 @@
 package com.soprasteria.http;
 
-import javax.net.ssl.SSLSocketFactory;
+import javax.net.SocketFactory;
 import java.io.IOException;
 
 public class HttpClient {
     public static void main(String[] args) throws IOException {
-        try (var socket = SSLSocketFactory.getDefault().createSocket("www.rfc-editor.org", 443)) {
-
+        try (var socket = SocketFactory.getDefault().createSocket("www.rfc-editor.org", 80)) {
             socket.getOutputStream().write("""
-                    GET /rfc/rfc7230-missing HTTP/1.1\r
+                    GET /rfc/rfc7230 HTTP/1.1\r
                     Host: www.rfc-editor.org\r
                     Connection: close\r
                     \r
