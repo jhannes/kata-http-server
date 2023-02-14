@@ -5,12 +5,13 @@ import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.Path;
 
 public class HttpServer {
 
     private final ServerSocket serverSocket;
 
-    HttpServer(int port) throws IOException {
+    HttpServer(int port, Path tempDir) throws IOException {
         serverSocket = new ServerSocket(port);
 
         new Thread(this::runServer).start();
@@ -54,6 +55,6 @@ public class HttpServer {
     }
 
     public static void main(String[] args) throws IOException {
-        new HttpServer(8080);
+        new HttpServer(8080, Path.of("src", "main", "resources"));
     }
 }
