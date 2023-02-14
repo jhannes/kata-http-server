@@ -33,46 +33,38 @@ public class HttpServerClient {
         }
     }
 
-    private void readHeaders() throws IOException {
-        String headerLine;
-        while (!(headerLine = readLine().trim()).isEmpty()) {
-            var parts = headerLine.split(":\\s*", 2);
-            headers.put(parts[0], parts[1]);
-        }
-    }
 
     private void handleLoginRequest() throws IOException {
         var requestMethod = requestLine.split(" ")[0];
         if (requestMethod.equals("GET")) {
-            handleGetLogin();
+            handleLoginGet();
         } else {
-            var body = readBody();
-            var parts = body.split("=");
-            var username = parts[1];
-            var sessionCookie = "session=" + username;
-            var location = "http://" + headers.get("Host") + "/";
-            clientSocket.getOutputStream().write("""
-                    HTTP/1.1 302 Moved\r
-                    Connection: close\r
-                    Set-Cookie: %s\r
-                    Location: %s\r
-                    \r
-                    """.formatted(sessionCookie, location).getBytes());
+            handleLoginPost();
         }
     }
 
-    private String readBody() throws IOException {
-        var result = new StringBuilder();
-        var contentLength = Integer.parseInt(headers.get("Content-Length"));
-        for (int i = 0; i < contentLength; i++) {
-            result.append((char)clientSocket.getInputStream().read());
-        }
-        return result.toString();
+    private void handleLoginPost() throws IOException {
+        var body = readBody();
+        // TODO: here, we should do read query string parsing
+        var parts = body.split("=");
+        var username = parts[1];
+
+        // TODO: Set-Cookie header should probably include HttpOnly, Secure and Path
+        var sessionCookie = "session=" + username;
+        var location = "http://" + headers.get("Host") + "/";
+        clientSocket.getOutputStream().write("""
+                HTTP/1.1 302 Moved\r
+                Connection: close\r
+                Set-Cookie: %s\r
+                Location: %s\r
+                \r
+                """.formatted(sessionCookie, location).getBytes());
     }
 
-    private void handleGetLogin() throws IOException {
+    private void handleLoginGet() throws IOException {
         var cookie = headers.get("Cookie");
         if (cookie != null) {
+            // TODO here, we should handle multiple cookies
             var parts = cookie.split("=");
             var body = "Logged in as " + parts[1];
             clientSocket.getOutputStream().write("""
@@ -92,17 +84,6 @@ public class HttpServerClient {
         }
     }
 
-    private void handleNotFound(String requestTarget) throws IOException {
-        var body = "Unknown path " + requestTarget;
-        clientSocket.getOutputStream().write("""
-                HTTP/1.1 404 Not found\r
-                Content-Length: %d\r
-                Connection: close\r
-                Content-type: text/html\r
-                \r
-                %s""".formatted(body.length(), body).getBytes());
-    }
-
     private void handleExistingFile(Path requestFile) throws IOException {
         clientSocket.getOutputStream().write("""
                 HTTP/1.1 200 OK\r
@@ -115,12 +96,40 @@ public class HttpServerClient {
         }
     }
 
+    private void handleNotFound(String requestTarget) throws IOException {
+        var body = "Unknown path " + requestTarget;
+        clientSocket.getOutputStream().write("""
+                HTTP/1.1 404 Not found\r
+                Content-Length: %d\r
+                Connection: close\r
+                Content-type: text/html\r
+                \r
+                %s""".formatted(body.length(), body).getBytes());
+    }
+
     private Path resolveRequestTarget(String requestTarget) {
         var result = httpRoot.resolve(requestTarget.substring(1));
         if (Files.isDirectory(result)) {
             return result.resolve("index.html");
         }
         return result;
+    }
+
+    private void readHeaders() throws IOException {
+        String headerLine;
+        while (!(headerLine = readLine().trim()).isEmpty()) {
+            var parts = headerLine.split(":\\s*", 2);
+            headers.put(parts[0], parts[1]);
+        }
+    }
+
+    private String readBody() throws IOException {
+        var result = new StringBuilder();
+        var contentLength = Integer.parseInt(headers.get("Content-Length"));
+        for (int i = 0; i < contentLength; i++) {
+            result.append((char)clientSocket.getInputStream().read());
+        }
+        return result.toString();
     }
 
     private String readLine() throws IOException {
