@@ -20,24 +20,31 @@ public class HttpServerClient {
 
         var requestFile = resolveRequestTarget(requestTarget);
         if (Files.exists(requestFile)) {
-            var body = Files.readString(requestFile);
-            clientSocket.getOutputStream().write("""
-                HTTP/1.1 200 OK\r
-                Content-Length: %d\r
-                Connection: close\r
-                \r
-                %s""".formatted(body.length(), body).getBytes());
-
+            handleExistingFile(requestFile);
         } else {
-            var body = "Unknown path " + requestTarget;
-            clientSocket.getOutputStream().write("""
-                HTTP/1.1 404 Not found\r
-                Content-Length: %d\r
-                Connection: close\r
-                Content-type: text/html\r
-                \r
-                %s""".formatted(body.length(), body).getBytes());
+            handleNotFound(requestTarget);
         }
+    }
+
+    private void handleNotFound(String requestTarget) throws IOException {
+        var body = "Unknown path " + requestTarget;
+        clientSocket.getOutputStream().write("""
+            HTTP/1.1 404 Not found\r
+            Content-Length: %d\r
+            Connection: close\r
+            Content-type: text/html\r
+            \r
+            %s""".formatted(body.length(), body).getBytes());
+    }
+
+    private void handleExistingFile(Path requestFile) throws IOException {
+        var body = Files.readString(requestFile);
+        clientSocket.getOutputStream().write("""
+            HTTP/1.1 200 OK\r
+            Content-Length: %d\r
+            Connection: close\r
+            \r
+            %s""".formatted(body.length(), body).getBytes());
     }
 
     private Path resolveRequestTarget(String requestTarget) {
