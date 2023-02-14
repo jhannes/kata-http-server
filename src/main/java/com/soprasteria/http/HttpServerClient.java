@@ -20,18 +20,22 @@ public class HttpServerClient {
 
         var requestFile = resolveRequestTarget(requestTarget);
         if (requestTarget.equals("/api/login")) {
-            var body = "Unauthorized user";
-            clientSocket.getOutputStream().write("""
-                HTTP/1.1 401 Unauthorized\r
-                Content-Length: %d\r
-                Connection: close\r
-                \r
-                %s""".formatted(body.length(), body).getBytes());
+            handleLoginRequest();
         } else if (Files.exists(requestFile)) {
             handleExistingFile(requestFile);
         } else {
             handleNotFound(requestTarget);
         }
+    }
+
+    private void handleLoginRequest() throws IOException {
+        var body = "Unauthorized user";
+        clientSocket.getOutputStream().write("""
+            HTTP/1.1 401 Unauthorized\r
+            Content-Length: %d\r
+            Connection: close\r
+            \r
+            %s""".formatted(body.length(), body).getBytes());
     }
 
     private void handleNotFound(String requestTarget) throws IOException {
