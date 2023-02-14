@@ -1,6 +1,7 @@
 package com.soprasteria.http;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.URL;
 
@@ -11,20 +12,28 @@ public class HttpServer {
     HttpServer(int port) throws IOException {
         serverSocket = new ServerSocket(port);
 
-        var clientSocket = serverSocket.accept();
+        new Thread(this::runServer).start();
+    }
 
-        var body = "Hello there";
-        clientSocket.getOutputStream().write("""
-                HTTP/1.1 200 OK\r
-                Content-Length: %d\r
-                Connection: close\r
-                Content-type: text/html\r
-                \r
-                %s""".formatted(body.length(), body).getBytes());
+    private void runServer() {
+        try {
+            var clientSocket = serverSocket.accept();
 
-        int c;
-        while((c = clientSocket.getInputStream().read()) != -1) {
-            System.out.print((char)c);
+            var body = "Hello there";
+            clientSocket.getOutputStream().write("""
+                    HTTP/1.1 200 OK\r
+                    Content-Length: %d\r
+                    Connection: close\r
+                    Content-type: text/html\r
+                    \r
+                    %s""".formatted(body.length(), body).getBytes());
+
+            int c;
+            while((c = clientSocket.getInputStream().read()) != -1) {
+                System.out.print((char)c);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -32,7 +41,7 @@ public class HttpServer {
         new HttpServer(8080);
     }
 
-    public URL getURL() {
-        return null;
+    public URL getURL() throws MalformedURLException {
+        return new URL("http", "localhost", serverSocket.getLocalPort(), "/");
     }
 }
