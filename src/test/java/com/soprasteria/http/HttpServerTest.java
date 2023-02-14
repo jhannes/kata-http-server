@@ -40,6 +40,12 @@ class HttpServerTest {
         assertEquals(content, asString(connection.getInputStream()));
     }
 
+    @Test
+    void shouldHandleMultipleRequests() throws IOException {
+        assertEquals(404, openConnection("/some-path").getResponseCode());
+        assertEquals(404, openConnection("/other-path").getResponseCode());
+    }
+
     private static String asString(InputStream inputStream) throws IOException {
         var buffer = new ByteArrayOutputStream();
         inputStream.transferTo(buffer);
