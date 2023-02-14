@@ -11,6 +11,7 @@ public class HttpServerClient {
     private final Socket clientSocket;
     private final Path httpRoot;
     private final Map<String, String> headers = new LinkedHashMap<>();
+    private String requestLine;
 
     public HttpServerClient(Socket clientSocket, Path httpRoot) {
         this.clientSocket = clientSocket;
@@ -18,7 +19,7 @@ public class HttpServerClient {
     }
 
     void handleClient() throws IOException {
-        String requestLine = readLine();
+        requestLine = readLine();
         readHeaders();
         var requestTarget = requestLine.split(" ")[1];
 
@@ -41,6 +42,19 @@ public class HttpServerClient {
     }
 
     private void handleLoginRequest() throws IOException {
+        var requestMethod = requestLine.split(" ")[0];
+        if (requestMethod.equals("GET")) {
+            handleGetLogin();
+        } else {
+            clientSocket.getOutputStream().write("""
+                    HTTP/1.1 200 OK\r
+                    Connection: close\r
+                    \r
+                    """.getBytes());
+        }
+    }
+
+    private void handleGetLogin() throws IOException {
         var cookie = headers.get("Cookie");
         if (cookie != null) {
             var parts = cookie.split("=");
