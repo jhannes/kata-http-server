@@ -46,7 +46,10 @@ public class HttpServerClient {
         if (requestMethod.equals("GET")) {
             handleGetLogin();
         } else {
-            var sessionCookie = "session=username";
+            var body = readBody();
+            var parts = body.split("=");
+            var username = parts[1];
+            var sessionCookie = "session=" + username;
             clientSocket.getOutputStream().write("""
                     HTTP/1.1 200 OK\r
                     Connection: close\r
@@ -54,6 +57,15 @@ public class HttpServerClient {
                     \r
                     """.formatted(sessionCookie).getBytes());
         }
+    }
+
+    private String readBody() throws IOException {
+        var result = new StringBuilder();
+        var contentLength = Integer.parseInt(headers.get("Content-Length"));
+        for (int i = 0; i < contentLength; i++) {
+            result.append((char)clientSocket.getInputStream().read());
+        }
+        return result.toString();
     }
 
     private void handleGetLogin() throws IOException {
