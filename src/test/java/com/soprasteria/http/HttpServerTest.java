@@ -46,6 +46,11 @@ class HttpServerTest {
         assertEquals(404, openConnection("/other-path").getResponseCode());
     }
 
+    @Test
+    void shouldReturn401ForUnauthorizedUsers() throws IOException {
+        assertEquals(401, openConnection("/api/login").getResponseCode());
+    }
+
     private static String asString(InputStream inputStream) throws IOException {
         var buffer = new ByteArrayOutputStream();
         inputStream.transferTo(buffer);
