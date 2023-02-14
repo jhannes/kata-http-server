@@ -19,7 +19,15 @@ public class HttpServerClient {
         var requestTarget = requestLine.split(" ")[1];
 
         var requestFile = resolveRequestTarget(requestTarget);
-        if (Files.exists(requestFile)) {
+        if (requestTarget.equals("/api/login")) {
+            var body = "Unauthorized user";
+            clientSocket.getOutputStream().write("""
+                HTTP/1.1 401 Unauthorized\r
+                Content-Length: %d\r
+                Connection: close\r
+                \r
+                %s""".formatted(body.length(), body).getBytes());
+        } else if (Files.exists(requestFile)) {
             handleExistingFile(requestFile);
         } else {
             handleNotFound(requestTarget);
