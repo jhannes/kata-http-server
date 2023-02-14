@@ -20,8 +20,7 @@ public class HttpServer {
 
     private void runServer() {
         try {
-            var clientSocket = serverSocket.accept();
-            new HttpServerClient(clientSocket, httpRoot).handleClient();
+            new HttpServerClient(serverSocket.accept(), httpRoot).handleClient();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

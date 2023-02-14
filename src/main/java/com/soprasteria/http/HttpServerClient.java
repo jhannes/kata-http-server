@@ -15,10 +15,10 @@ public class HttpServerClient {
     }
 
     void handleClient() throws IOException {
-        String requestLine = readLine(clientSocket);
+        String requestLine = readLine();
         var requestTarget = requestLine.split(" ")[1];
 
-        var requestFile = httpRoot.resolve(requestTarget.substring(1));
+        var requestFile = resolveRequestTarget(requestTarget);
         if (Files.exists(requestFile)) {
             var body = Files.readString(requestFile);
             clientSocket.getOutputStream().write("""
@@ -40,7 +40,11 @@ public class HttpServerClient {
         }
     }
 
-    private static String readLine(Socket clientSocket) throws IOException {
+    private Path resolveRequestTarget(String requestTarget) {
+        return httpRoot.resolve(requestTarget.substring(1));
+    }
+
+    private String readLine() throws IOException {
         var line = new StringBuilder();
         int c;
         while((c = clientSocket.getInputStream().read()) != -1) {
