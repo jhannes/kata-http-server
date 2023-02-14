@@ -2,6 +2,7 @@ package com.soprasteria.http;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.URL;
 
 public class HttpServer {
 
@@ -29,5 +30,9 @@ public class HttpServer {
 
     public static void main(String[] args) throws IOException {
         new HttpServer(8080);
+    }
+
+    public URL getURL() {
+        return null;
     }
 }
