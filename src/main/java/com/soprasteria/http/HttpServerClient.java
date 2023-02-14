@@ -36,7 +36,7 @@ public class HttpServerClient {
     private void readHeaders() throws IOException {
         String headerLine;
         while (!(headerLine = readLine().trim()).isEmpty()) {
-            var parts = headerLine.split(":\\s*");
+            var parts = headerLine.split(":\\s*", 2);
             headers.put(parts[0], parts[1]);
         }
     }
