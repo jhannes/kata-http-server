@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,9 +32,11 @@ class HttpServerTest {
 
     @Test
     void shouldReturn200ForFoundFile() throws IOException {
-        Files.writeString(tempDir.resolve("plain.txt"), "Hello World");
+        var content = "Hello World " + LocalTime.now();
+        Files.writeString(tempDir.resolve("plain.txt"), content);
         var connection = openConnection("plain.txt");
         assertEquals(200, connection.getResponseCode());
+        assertEquals(content, asString(connection));
     }
 
     private static String asString(HttpURLConnection connection) throws IOException {
