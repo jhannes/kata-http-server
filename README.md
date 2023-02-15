@@ -10,6 +10,8 @@ The presentation builds a (more or less) working HTTP server from scratch in one
 * java.net.URL for testing
 * JUnit 5 for testing
 
+We use [RFC 7230](https://www.rfc-editor.org/rfc/rfc7230) for reference (it's not the newest, but it's the one I know best)
+
 During the presentation we build a server that can:
 
 * Respond to HTTP requests
