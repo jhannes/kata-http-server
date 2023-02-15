@@ -5,7 +5,7 @@ This project contains the result and notes for Johannes Brodwall's presentation 
 The presentation builds a (more or less) working HTTP server from scratch in one hour with no real dependencies. It only uses the following:
 
 * The Java 19 programming language
-* java.lang and java.io packages
+* java.lang, java.util, java.nio and java.io packages
 * java.net.Socket and java.net.ServerSocket
 * java.net.URL for testing
 * JUnit 5 for testing
