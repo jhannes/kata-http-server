@@ -40,3 +40,41 @@ This repository contains several iterations of building the code bases, each liv
 
 * [A comprehensive server](https://github.com/jhannes/kata-http-server/tree/reference/comprehensive-server) - includes routing and a `HttpRequestHandler` framework, SSL support, a strong `HttpServerRequest` class with header parsing, request parsing and cookie parsing, and a fluid `HttpServerResponse`. This lets you see a fairly comprehensive result
 * [A stepwise commit log](https://github.com/jhannes/kata-http-server/commits/reference/stepwise-commits) with 50 commits showing a step-by-step approach with each new failing test, each completed test and each refactor as a new commit. This lets you follow the process as I build a fairly functioning server.
+
+## Programmer tips
+
+I often get asked how to learn how to work effectively with IntelliJ. Like everything, it's always a matter of practice, but I have a few recommendations as to what to focus on when you practice
+
+### IntellJ shortcuts
+
+These are some of the most versatile keyboard shortcuts in IntelliJ. There are many more, but learning these 12 will really speed up your code
+
+| Shortcut (Windows)   | Shortcut (Mac)      | Command                                          |
+|----------------------|---------------------|--------------------------------------------------|
+| alt-enter            | opt-enter           | Show content action (quick fix)                  |
+| ctrl-alt-shift-t     | ctrl-t              | Refactor this (show refactor menu)               |
+| alt-insert           | cmd-n               | New... (add some content)                        |
+| ctrl-w               | opt-up              | Expand selection (add shift to go the other way) |
+| shift-alt-f10        | ctrl-opt-r          | Run....                                          |
+| shift-alt-f9         | ctrl-opt-d          | Debug....                                        |
+| shift-f10            | ctrl-d              | Rerun last....                                   |
+| ctrl-b               | cmd-b               | Navigate to symbol                               |
+| alt-ctrl-left        | cmd-opt-b           | Navigate back                                    |
+| alt-j                | ctrl-g              | Add next match to selection (multi-cursor)       |
+| shift-ctrl-backspace | shift-cmd-backspace | Goto last edit location                          |
+| shift, shift         | shift, shift        | Search anywhere                                  |
+
+Make yourself familiar with `Refactor this` (ctrl-alt-shift-t / ctrl-t) and use it to learn the shortcut keys for your favorite refactorings like Extract method, Rename and Inline. Also, make sure you explore what's available on the Content Action (alt-enter).
+
+Also remember basic cursor navigation like ctrl-left and ctrl-right to jump one word at a time, home and end and holding shift to expand selection while you move the cursor.
+
+### IntelliJ Live Templates
+
+Less used than the shortcuts, these shorthand ways of writing common bits of Java code can save a bit of time. Write the name of the code template in the right spot and press Tab to have IntelliJ expand it
+
+| Template    | Result                                     |
+|-------------|--------------------------------------------|
+| `fori`      | `for (int i=0; i<...; i++) {}`             |
+| `main`      | `public static void main(String[] args) {` |
+| `sout`      | `System.out.println();`                    |
+
