@@ -37,6 +37,7 @@ This repository contains several iterations of building the code bases, each liv
 * [Performance starting point](https://github.com/jhannes/kata-http-server/tags)
 * [JavaBin Christmas Lecture, 2022](https://github.com/jhannes/kata-http-server/tree/performance/javabin-2022-M12)
 * [Sopra Steria DevMeetup, 2022](https://github.com/jhannes/kata-http-server/tree/performance/soprasteria-2023-M2)
+* [Norwegian Police, 2023](https://github.com/jhannes/kata-http-server/tree/performance/politiet-2023M03)
 
 ### Reference implementations
 
