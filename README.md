@@ -2,23 +2,23 @@
 
 A demonstration of how to build an http server
 
-* [ ] What does the browser say?
-* [ ] What does the server say?
-* [ ] Structure the server to be testable
-* [ ] Unit test: A totally empty server
-* [ ] Unit test: Responding with a file
-* [ ] Demo: Responding with a file
-* [ ] Unit test: Responding more than once
-* [ ] Demo: Logging in and showing the user
-* [ ] Unit test: 401 if there's no cookie
-* [ ] Unit test: Respond with name if there is a cookie
-* [ ] Demo: Setting the cookie in the development tools (and logging out)
-* [ ] Unit test: Setting the cookie
-* [ ] Demo: Logging in and showing the user
+* [x] What does the browser say?
+* [x] What does the server say?
+* [x] Structure the server to be testable
+* [x] Unit test: A totally empty server
+* [x] Unit test: Responding with a file
+* [x] Demo: Responding with a file
+* [x] Unit test: Responding more than once
+* [x] Demo: Logging in and showing the user
+* [x] Unit test: 401 if there's no cookie
+* [x] Unit test: Respond with name if there is a cookie
+* [x] Demo: Setting the cookie in the development tools (and logging out)
+* [x] Unit test: Setting the cookie
+* [x] Demo: Logging in and showing the user
 
 ### Obvious flaws
 
-* [ ] Smart: Refactor http server with new methods
+* [ ] Silly: Refactor http server with new methods
 * [ ] Fatal: respond to dir requests with welcome-files (instead of crashing!)
 * [ ] Fatal: don't crash on binary files
 * [ ] Fatal: don't serve files outside of the contentRoot
