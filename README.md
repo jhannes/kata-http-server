@@ -1,8 +1,10 @@
 # HTTP server kata
 
-This project contains the result and notes for Johannes Brodwall's presentation on Building an HTTP Server with Nothing Up My Sleeves.
+This project contains the result and notes for Johannes Brodwall's presentation on Building an HTTP Server with Nothing
+Up My Sleeves.
 
-The presentation builds a (more or less) working HTTP server from scratch in one hour with no real dependencies. It only uses the following:
+The presentation builds a (more or less) working HTTP server from scratch in one hour with no real dependencies. It only
+uses the following:
 
 * The Java 19 programming language
 * java.lang, java.util, java.nio and java.io packages
@@ -10,7 +12,8 @@ The presentation builds a (more or less) working HTTP server from scratch in one
 * java.net.URL for testing
 * JUnit 5 for testing
 
-We use [RFC 7230](https://www.rfc-editor.org/rfc/rfc7230) for reference (it's not the newest, but it's the one I know best)
+We use [RFC 7230](https://www.rfc-editor.org/rfc/rfc7230) for reference (it's not the newest, but it's the one I know
+best)
 
 During the presentation we build a server that can:
 
@@ -36,22 +39,29 @@ This repository contains several iterations of building the code bases, each liv
 
 * [Performance starting point](https://github.com/jhannes/kata-http-server/tags)
 * [JavaBin Christmas Lecture, 2022](https://github.com/jhannes/kata-http-server/tree/performance/javabin-2022-M12)
-* [Sopra Steria DevMeetup, 2022](https://github.com/jhannes/kata-http-server/tree/performance/soprasteria-2023-M2)
+* [Sopra Steria DevMeetup, 2023](https://github.com/jhannes/kata-http-server/tree/performance/soprasteria-2023-M2)
 * [Norwegian Police, 2023](https://github.com/jhannes/kata-http-server/tree/performance/politiet-2023M03)
 * [JavaBin Sørlandet in Kristiansand, 2023](https://github.com/jhannes/kata-http-server/tree/performance/2023-M06-kristiansand)
+* [Fredrikstad tech community, 2023](https://github.com/jhannes/kata-http-server/tree/performance/2023-fredrikstad)
 
 ### Reference implementations
 
-* [A comprehensive server](https://github.com/jhannes/kata-http-server/tree/reference/comprehensive-server) - includes routing and a `HttpRequestHandler` framework, SSL support, a strong `HttpServerRequest` class with header parsing, request parsing and cookie parsing, and a fluid `HttpServerResponse`. This lets you see a fairly comprehensive result
-* [A stepwise commit log](https://github.com/jhannes/kata-http-server/commits/reference/stepwise-commits) with 50 commits showing a step-by-step approach with each new failing test, each completed test and each refactor as a new commit. This lets you follow the process as I build a fairly functioning server.
+* [A comprehensive server](https://github.com/jhannes/kata-http-server/tree/reference/comprehensive-server) - includes
+  routing and a `HttpRequestHandler` framework, SSL support, a strong `HttpServerRequest` class with header parsing,
+  request parsing and cookie parsing, and a fluid `HttpServerResponse`. This lets you see a fairly comprehensive result
+* [A stepwise commit log](https://github.com/jhannes/kata-http-server/commits/reference/stepwise-commits) with 50
+  commits showing a step-by-step approach with each new failing test, each completed test and each refactor as a new
+  commit. This lets you follow the process as I build a fairly functioning server.
 
 ## Programmer tips
 
-I often get asked how to learn how to work effectively with IntelliJ. Like everything, it's always a matter of practice, but I have a few recommendations as to what to focus on when you practice
+I often get asked how to learn how to work effectively with IntelliJ. Like everything, it's always a matter of practice,
+but I have a few recommendations as to what to focus on when you practice
 
 ### IntellJ shortcuts
 
-These are some of the most versatile keyboard shortcuts in IntelliJ. There are many more, but learning these 12 will really speed up your code
+These are some of the most versatile keyboard shortcuts in IntelliJ. There are many more, but learning these 12 will
+really speed up your code
 
 | Shortcut (Windows)   | Shortcut (Mac)      | Command                                          |
 |----------------------|---------------------|--------------------------------------------------|
@@ -68,17 +78,21 @@ These are some of the most versatile keyboard shortcuts in IntelliJ. There are m
 | shift-ctrl-backspace | shift-cmd-backspace | Goto last edit location                          |
 | shift, shift         | shift, shift        | Search anywhere                                  |
 
-Make yourself familiar with `Refactor this` (ctrl-alt-shift-t / ctrl-t) and use it to learn the shortcut keys for your favorite refactorings like Extract method, Rename and Inline. Also, make sure you explore what's available on the Content Action (alt-enter).
+Make yourself familiar with `Refactor this` (ctrl-alt-shift-t / ctrl-t) and use it to learn the shortcut keys for your
+favorite refactorings like Extract method, Rename and Inline. Also, make sure you explore what's available on the
+Content Action (alt-enter).
 
-Also remember basic cursor navigation like ctrl-left and ctrl-right to jump one word at a time, home and end and holding shift to expand selection while you move the cursor.
+Also remember basic cursor navigation like ctrl-left and ctrl-right to jump one word at a time, home and end and holding
+shift to expand selection while you move the cursor.
 
 ### IntelliJ Live Templates
 
-Less used than the shortcuts, these shorthand ways of writing common bits of Java code can save a bit of time. Write the name of the code template in the right spot and press Tab to have IntelliJ expand it
+Less used than the shortcuts, these shorthand ways of writing common bits of Java code can save a bit of time. Write the
+name of the code template in the right spot and press Tab to have IntelliJ expand it
 
-| Template    | Result                                     |
-|-------------|--------------------------------------------|
-| `fori`      | `for (int i=0; i<...; i++) {}`             |
-| `main`      | `public static void main(String[] args) {` |
-| `sout`      | `System.out.println();`                    |
+| Template | Result                                     |
+|----------|--------------------------------------------|
+| `fori`   | `for (int i=0; i<...; i++) {}`             |
+| `main`   | `public static void main(String[] args) {` |
+| `sout`   | `System.out.println();`                    |
 
