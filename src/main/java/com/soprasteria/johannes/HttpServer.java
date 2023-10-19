@@ -8,6 +8,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.regex.Pattern;
+
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class HttpServer {
 
@@ -55,27 +59,108 @@ public class HttpServer {
             headers.put(headerParts[0], headerParts[1].trim());
         }
 
+        var requestPath = contentRoot.resolve(requestTarget.substring(1));
+        System.out.println("Request path " + requestPath.toAbsolutePath());
+        if (Files.isDirectory(requestPath)) {
+            requestPath = requestPath.resolve("index.html");
+        }
 
         if (requestTarget.equals("/api/login")) {
             handleApiLogin(requestMethod, clientSocket, headers);
-            return;
+        } else if (Files.exists(requestPath) && requestPath.normalize().startsWith(contentRoot)) {
+            respondWithFile(clientSocket, requestPath);
+        } else {
+            respondWithNotFound(clientSocket, requestTarget);
+        }
+    }
+
+    private static void handleApiLogin(String requestMethod, Socket clientSocket, HashMap<String, String> headers) throws IOException {
+        var cookieHeader = headers.get("Cookie");
+        if (requestMethod.equals("POST")) {
+            handlePostApiLogin(clientSocket, headers);
+        } else if (cookieHeader == null) {
+            respondWithUnauthorized(clientSocket);
+        } else {
+            handleGetApiLogin(clientSocket, cookieHeader);
         }
 
-        var requestPath = contentRoot.resolve(requestTarget.substring(1));
-        System.out.println("Request path " + requestPath.toAbsolutePath());
-        if (Files.exists(requestPath)) {
-            var response = Files.readString(requestPath);
-            clientSocket.getOutputStream().write(
-                    """
-                    HTTP/1.1 200 OK\r
-                    Content-Length: %d\r
-                    Connection: close\r
-                    \r
-                    %s""".formatted(response.length(), response).getBytes()
-            );
-            return;
+    }
+
+    private static void handleGetApiLogin(Socket clientSocket, String cookieHeader) throws IOException {
+        var cookies = new HashMap<String, String>();
+        for (var cookieString : cookieHeader.split(";\\s*")) {
+            var cookieParts = cookieString.split("=", 2);
+            cookies.put(cookieParts[0], cookieParts[1]);
+        }
+        var username = cookies.get("session").replace('+', ' ');
+        var encodingPattern = Pattern.compile("%([A-Z0-9]{2})%([A-Z0-9]{2})");
+        username = encodingPattern.matcher(username).replaceAll(match -> new String(new byte[] {
+                (byte) Integer.parseInt(match.group(1), 0x10),
+                (byte) Integer.parseInt(match.group(2), 0x10),
+        }, UTF_8));
+        var response = "Welcome " + username;
+        clientSocket.getOutputStream().write(
+                """
+                HTTP/1.1 200 OK\r
+                Content-Length: %d\r
+                Connection: close\r
+                \r
+                %s""".formatted(response.length(), response).getBytes(ISO_8859_1)
+        );
+    }
+
+
+    private static void handlePostApiLogin(Socket clientSocket, HashMap<String, String> headers) throws IOException {
+        var contentLength = Integer.parseInt(headers.get("Content-Length"));
+
+        var body = readBody(clientSocket, contentLength);
+        var form = new HashMap<String, String>();
+        for (var parameter : body.split("&")) {
+            var parameterParts = parameter.split("=", 2);
+            var paramName = parameterParts[0];
+            var paramValue = parameterParts[1];
+            form.put(paramName, paramValue);
         }
 
+        var location = "http://" + headers.get("Host") + "/";
+        clientSocket.getOutputStream().write(
+                """
+                HTTP/1.1 302 Found\r
+                Connection: close\r
+                Set-Cookie: session=%s\r
+                Location: %s\r
+                \r
+                """.formatted(form.get("username"), location).getBytes()
+        );
+    }
+
+    private static void respondWithFile(Socket clientSocket, Path requestPath) throws IOException {
+        clientSocket.getOutputStream().write(
+                """
+                HTTP/1.1 200 OK\r
+                Content-Length: %d\r
+                Connection: close\r
+                \r
+                """.formatted(Files.size(requestPath)).getBytes()
+        );
+        try (var fileStream = Files.newInputStream(requestPath)) {
+            fileStream.transferTo(clientSocket.getOutputStream());
+        }
+    }
+
+    private static void respondWithUnauthorized(Socket clientSocket) throws IOException {
+        var response = "Not logged in";
+        clientSocket.getOutputStream().write(
+                """
+                HTTP/1.1 401 Unauthenticated\r
+                Content-Length: %d\r
+                Connection: close\r
+                \r
+                %s""".formatted(response.length(), response).getBytes()
+        );
+    }
+
+    private static void respondWithNotFound(Socket clientSocket, String requestTarget) throws IOException {
         var response = "Not found " + requestTarget;
         clientSocket.getOutputStream().write(
                 """
@@ -86,59 +171,14 @@ public class HttpServer {
                 \r
                 %s""".formatted(response.length(), response).getBytes()
         );
-
     }
 
-    private static void handleApiLogin(String requestMethod, Socket clientSocket, HashMap<String, String> headers) throws IOException {
-        if (requestMethod.equals("POST")) {
-            var contentLength = Integer.parseInt(headers.get("Content-Length"));
-
-            var requestBody = new StringBuilder();
-            for (int i = 0; i < contentLength; i++) {
-                requestBody.append((char) clientSocket.getInputStream().read());
-            }
-            var parameterParts = requestBody.toString().split("=");
-            var username = parameterParts[1];
-
-            var response = "You are now logged in";
-            clientSocket.getOutputStream().write(
-                    """
-                    HTTP/1.1 200 OK\r
-                    Content-Length: %d\r
-                    Connection: close\r
-                    Set-Cookie: session=%s\r
-                    \r
-                    %s""".formatted(response.length(), username, response).getBytes()
-            );
-            return;
+    private static String readBody(Socket clientSocket, int contentLength) throws IOException {
+        var requestBody = new StringBuilder();
+        for (int i = 0; i < contentLength; i++) {
+            requestBody.append((char) clientSocket.getInputStream().read());
         }
-
-
-        var cookie = headers.get("Cookie");
-
-        if (cookie == null) {
-            var response = "Not logged in";
-            clientSocket.getOutputStream().write(
-                    """
-                    HTTP/1.1 401 Unauthenticated\r
-                    Content-Length: %d\r
-                    Connection: close\r
-                    \r
-                    %s""".formatted(response.length(), response).getBytes()
-            );
-            return;
-        }
-
-        var cookieParts = cookie.split("=", 2);
-        var response = "Welcome " + cookieParts[1];
-        clientSocket.getOutputStream().write(
-                """
-                HTTP/1.1 200 OK\r
-                Content-Length: %d\r
-                Connection: close\r
-                \r
-                %s""".formatted(response.length(), response).getBytes()
-        );
+        return requestBody.toString();
     }
 
     private static String readLine(Socket clientSocket) throws IOException {

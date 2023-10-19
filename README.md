@@ -18,11 +18,12 @@ GIVE IT UP FOR Johannes Brodwall i Fredrikstad
 
 Ting som mangler:
 
-KRITISK: index.html
-KRITISK: favicons.ico
-KRITISK: GET ../../../README.md
-ALVORLIG: form processing
-ALVORLIG: mer enn én cookie
-VIKTIG: URL encoding + utf 8
-NYTTIG: Redirect
+* [x] LURT: refactoring
+* [x] KRITISK: index.html
+* [x] KRITISK: favicons.ico
+* [x] KRITISK: GET ../../../README.md
+* [x] ALVORLIG: form processing
+* [x] ALVORLIG: mer enn én cookie
+* [x] VIKTIG: URL encoding + utf 8
+* [x] NYTTIG: Redirect
 

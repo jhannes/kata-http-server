@@ -7,10 +7,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 class HttpServerTest {
 
     private final Path contentRoot = Path.of("target", "test", String.valueOf(System.currentTimeMillis()));
@@ -32,10 +35,39 @@ class HttpServerTest {
     @Test
     void shouldReturnFile() throws IOException {
         var testFile = "index.txt";
-        String content = "File Content " + System.currentTimeMillis();
+        var content = "File Content " + System.currentTimeMillis();
         Files.writeString(contentRoot.resolve(testFile), content);
 
         var conn = openConnection(testFile);
+        assertEquals(200, conn.getResponseCode());
+        assertEquals(content, readOutput(conn.getInputStream()));
+    }
+
+    @Test
+    void shouldReturnBinaryFile() throws IOException {
+        var favIcon = Path.of("src", "main", "resources", "favicon.ico");
+        Files.copy(favIcon, contentRoot.resolve(favIcon.getFileName()));
+        var conn = openConnection("favicon.ico");
+        assertEquals(200, conn.getResponseCode());
+        assertEquals(Files.size(favIcon), conn.getContentLength());
+    }
+
+    @Test
+    void shouldNotResolveFileAboveContentRoot() throws IOException {
+        Files.writeString(contentRoot.resolve("../secret.txt"), "secret content");
+        var conn = openConnection("../secret.txt");
+        assertEquals(404, conn.getResponseCode());
+        assertEquals("Not found /../secret.txt", readOutput(conn.getErrorStream()));
+    }
+
+    @Test
+    void shouldShowWelcomeFile() throws IOException {
+        var testFile = Path.of("foo", "index.html");
+        var content = "File Content " + System.currentTimeMillis();
+        Files.createDirectories(contentRoot.resolve(testFile).getParent());
+        Files.writeString(contentRoot.resolve(testFile), content);
+
+        var conn = openConnection("/foo");
         assertEquals(200, conn.getResponseCode());
         assertEquals(content, readOutput(conn.getInputStream()));
     }
@@ -55,8 +87,11 @@ class HttpServerTest {
     @Test
     void shouldShowUsernameFromCookie() throws IOException {
         var conn = openConnection("/api/login");
-        var username = "Johannes-" + System.currentTimeMillis();
-        conn.setRequestProperty("Cookie", "session=" + username);
+        var username = "Blå bær syltetøy " + System.currentTimeMillis();
+        var cookie = "otherCookie=abc; session=" +
+                     URLEncoder.encode(username, UTF_8) +
+                     "; yet-another=pqr";
+        conn.setRequestProperty("Cookie", cookie);
         assertEquals(200, conn.getResponseCode());
         assertEquals("Welcome " + username, readOutput(conn.getInputStream()));
     }
@@ -68,11 +103,12 @@ class HttpServerTest {
         conn.setDoOutput(true);
         conn.setInstanceFollowRedirects(false);
         var username = "Test-" + System.currentTimeMillis();
-        conn.getOutputStream().write(("username=" + username).getBytes());
+        conn.getOutputStream().write(("username=%s&password=%s".formatted(username, "secret")).getBytes());
 
-        assertEquals(200, conn.getResponseCode());
+        assertEquals(302, conn.getResponseCode());
         var setCookie = conn.getHeaderField("Set-Cookie");
         assertEquals("session=" + username, setCookie);
+        assertEquals(server.getURL().toString(), conn.getHeaderField("Location"));
     }
 
 
